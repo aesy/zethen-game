@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "CommonJS",
-    "strict": true,
-    "noImplicitReturns": true,
-    "esModuleInterop": true,
     "baseUrl": ".",
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "strict": true,
+    "target": "ESNext",
+    "types": ["@rsbuild/core/types"]
   },
-  "include": ["src", "test", "typings"]
+  "include": ["src", "test"]
 }

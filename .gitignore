@@ -24,3 +24,6 @@ coverage
 
 # We use package-lock.json
 yarn.lock
+
+# CSS-modules types
+*.scss.d.ts
