@@ -13,10 +13,11 @@ export default defineConfig({
   },
   html: {
     inject: "body",
-    title: "Brickbreaker 2.0",
+    title: "Zethen",
     template: "src/index.html",
   },
   output: {
+    assetPrefix: "./",
     cssModules: {
       exportLocalsConvention: "camelCaseOnly",
       mode: "pure",

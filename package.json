@@ -1,5 +1,5 @@
 {
-  "name": "brickbreaker-2.0",
+  "name": "Zethen",
   "type": "module",
   "private": true,
   "scripts": {
@@ -7,31 +7,33 @@
     "build": "rsbuild build",
     "lint": "npm-run-all --parallel lint:scripts lint:styles",
     "lint:scripts": "eslint \"{src,test,typings}/**/*.{js,ts}\"",
-    "lint:styles": "stylelint \"{src}/**/*.{css,scss}\"",
-    "test": "vitest"
+    "lint:styles": "stylelint \"{src,test}/**/*.{css,scss}\"",
+    "test": "vitest",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": { },
   "devDependencies": {
-    "@rsbuild/core": "1.0.5",
+    "@rsbuild/core": "1.0.19",
     "@rsbuild/plugin-image-compress": "1.0.2",
-    "@rsbuild/plugin-sass": "1.0.1",
+    "@rsbuild/plugin-sass": "1.1.0",
     "@rsbuild/plugin-type-check": "1.0.1",
     "@rsbuild/plugin-typed-css-modules": "1.0.2",
-    "@typescript-eslint/eslint-plugin": "8.6.0",
-    "@typescript-eslint/parser": "8.6.0",
+    "@typescript-eslint/eslint-plugin": "8.12.2",
+    "@typescript-eslint/parser": "8.12.2",
     "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-import": "2.30.0",
+    "eslint-plugin-import": "2.31.0",
     "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-promise": "7.1.0",
+    "gh-pages": "6.2.0",
     "npm-run-all": "4.1.5",
     "prettier": "3.3.3",
-    "stylelint": "16.9.0",
+    "stylelint": "16.10.0",
     "stylelint-config-standard-scss": "13.1.0",
-    "stylelint-scss": "6.7.0",
-    "typescript": "5.6.2",
+    "stylelint-scss": "6.8.1",
+    "typescript": "5.6.3",
     "vite-tsconfig-paths": "5.0.1",
-    "vitest": "2.1.1"
+    "vitest": "2.1.4"
   },
   "browserslist": [
     "defaults"

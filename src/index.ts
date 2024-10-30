@@ -1,8 +1,8 @@
 import "@/globals";
-import { createBrickBreakerGame } from "@/game/brickbreaker";
+import { createGame } from "@/game/zethen";
 
 try {
-  const game = createBrickBreakerGame();
+  const game = createGame();
   game.start();
 } catch (error) {
   console.error(error);

@@ -30,7 +30,7 @@ function onVisibilityChange(game: Game): void {
   }
 }
 
-export function createBrickBreakerGame(): Game {
+export function createGame(): Game {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
 
   if (!canvas) {
