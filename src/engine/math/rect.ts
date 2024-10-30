@@ -1,145 +1,324 @@
-import { clamp } from "@/engine/math/util";
-import { Point2, Point } from "@/engine/math/point";
-import { Dimension2 } from "@/engine/math/dimension";
-import { Circle } from "@/engine/math/circle";
+import { clamp } from "@/engine/util/math";
+import { Pnt2, Pnt2Like, ReadonlyPnt2 } from "@/engine/math/pnt2";
+import { Line2, ReadonlyLine2 } from "@/engine/math/line2";
+import { Circle, CircleLike } from "@/engine/math/circle";
 
-export interface Rect {
-  position: Point2;
-  size: Dimension2;
-}
+export type RectLike = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
-export namespace Rect {
-  export function isInstance(obj: unknown): obj is Rect {
-    if (obj && typeof obj === "object") {
-      return obj.hasOwnProperty("position") && obj.hasOwnProperty("size");
-    }
+export type ReadonlyRect = Readonly<RectLike> & {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  center: ReadonlyPnt2;
+  topLeft: ReadonlyPnt2;
+  topRight: ReadonlyPnt2;
+  bottomLeft: ReadonlyPnt2;
+  bottomRight: ReadonlyPnt2;
+  corners: [ReadonlyPnt2, ReadonlyPnt2, ReadonlyPnt2, ReadonlyPnt2];
+  edges: [
+    Readonly<ReadonlyLine2>,
+    Readonly<ReadonlyLine2>,
+    Readonly<ReadonlyLine2>,
+    Readonly<ReadonlyLine2>,
+  ];
+  getClosestPoint(point: Readonly<Pnt2Like>): Pnt2;
+  containsPoint(point: Readonly<Pnt2Like>): boolean;
+  containsRect(rect: Readonly<RectLike>): boolean;
+  containsCircle(circle: Readonly<CircleLike>): boolean;
+  overlapsRect(rect: Readonly<RectLike>): boolean;
+  overlapsCircle(circle: Readonly<CircleLike>): boolean;
+  intersectRect(rect: Readonly<RectLike>): Rect | null;
+  intersectCircle(circle: Readonly<CircleLike>): Rect | null;
+  equals(other: Readonly<RectLike>, epsilon: number): boolean;
+  clone(): Rect;
+  toString(): string;
+};
 
-    return false;
+export class Rect implements RectLike, ReadonlyRect {
+  constructor(
+    public x: number,
+    public y: number,
+    public width: number,
+    public height: number,
+  ) {}
+
+  public get center(): ReadonlyPnt2 {
+    return Rect.getCenter(this);
   }
 
-  export function getCenter(rect: Rect): Point2 {
-    return {
-      x: rect.position.x + rect.size.width / 2,
-      y: rect.position.y + rect.size.height / 2,
-    };
+  public get left(): number {
+    return Rect.getLeft(this);
   }
 
-  export function getLeft(rect: Rect): number {
-    return rect.position.x;
+  public get right(): number {
+    return Rect.getRight(this);
   }
 
-  export function getRight(rect: Rect): number {
-    return rect.position.x + rect.size.width;
+  public get top(): number {
+    return Rect.getTop(this);
   }
 
-  export function getTop(rect: Rect): number {
-    return rect.position.y;
+  public get bottom(): number {
+    return Rect.getBottom(this);
   }
 
-  export function getBottom(rect: Rect): number {
-    return rect.position.y + rect.size.height;
+  public get topLeft(): ReadonlyPnt2 {
+    return Rect.getTopLeft(this);
   }
 
-  export function getTopLeft(rect: Rect): Point2 {
-    return { x: getLeft(rect), y: getTop(rect) };
+  public get topRight(): ReadonlyPnt2 {
+    return Rect.getTopRight(this);
   }
 
-  export function getTopRight(rect: Rect): Point2 {
-    return { x: getRight(rect), y: getTop(rect) };
+  public get bottomLeft(): ReadonlyPnt2 {
+    return Rect.getBottomLeft(this);
   }
 
-  export function getBottomLeft(rect: Rect): Point2 {
-    return { x: getLeft(rect), y: getBottom(rect) };
+  public get bottomRight(): ReadonlyPnt2 {
+    return Rect.getBottomRight(this);
   }
 
-  export function getBottomRight(rect: Rect): Point2 {
-    return { x: getRight(rect), y: getBottom(rect) };
+  public get corners(): [
+    ReadonlyPnt2,
+    ReadonlyPnt2,
+    ReadonlyPnt2,
+    ReadonlyPnt2,
+  ] {
+    return Rect.getCorners(this);
   }
 
-  export function getClosestPoint(rect: Rect, point: Point2): Point2 {
-    if (containsPoint(rect, point)) {
-      const distanceTopLeft = Point.subtract(point, getTopLeft(rect));
-      const distanceBottomRight = Point.subtract(getBottomRight(rect), point);
-      const xMin = Math.min(distanceTopLeft.x, distanceBottomRight.x);
-      const yMin = Math.min(distanceTopLeft.y, distanceBottomRight.y);
+  public get edges(): [
+    Readonly<Line2>,
+    Readonly<Line2>,
+    Readonly<Line2>,
+    Readonly<Line2>,
+  ] {
+    return Rect.getEdges(this);
+  }
+
+  public static from(rect: Readonly<RectLike>): Rect {
+    return new Rect(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  public static getCenter(rect: Readonly<RectLike>): Pnt2 {
+    return new Pnt2(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  }
+
+  public static getLeft(rect: Readonly<RectLike>): number {
+    return rect.x;
+  }
+
+  public static getRight(rect: Readonly<RectLike>): number {
+    return rect.x + rect.width;
+  }
+
+  public static getTop(rect: Readonly<RectLike>): number {
+    return rect.y;
+  }
+
+  public static getBottom(rect: Readonly<RectLike>): number {
+    return rect.y + rect.height;
+  }
+
+  public static getTopLeft(rect: Readonly<RectLike>): Pnt2 {
+    return new Pnt2(rect.x, rect.y);
+  }
+
+  public static getTopRight(rect: Readonly<RectLike>): Pnt2 {
+    return new Pnt2(rect.x + rect.width, rect.y);
+  }
+
+  public static getBottomLeft(rect: Readonly<RectLike>): Pnt2 {
+    return new Pnt2(rect.x, rect.y + rect.height);
+  }
+
+  public static getBottomRight(rect: Readonly<RectLike>): Pnt2 {
+    return new Pnt2(rect.x + rect.width, rect.y + rect.height);
+  }
+
+  public static getCorners(rect: Readonly<RectLike>): [Pnt2, Pnt2, Pnt2, Pnt2] {
+    return [
+      Rect.getTopLeft(rect),
+      Rect.getTopRight(rect),
+      Rect.getBottomRight(rect),
+      Rect.getBottomLeft(rect),
+    ];
+  }
+
+  public static getEdges(
+    rect: Readonly<RectLike>,
+  ): [Line2, Line2, Line2, Line2] {
+    const corners = Rect.getCorners(rect);
+
+    return [
+      new Line2(corners[0], corners[1]),
+      new Line2(corners[1], corners[2]),
+      new Line2(corners[2], corners[3]),
+      new Line2(corners[3], corners[0]),
+    ];
+  }
+
+  public static getClosestPoint(
+    rect: Readonly<RectLike>,
+    point: Readonly<Pnt2Like>,
+  ): Pnt2 {
+    const result = Pnt2.from(point);
+    const left = rect.x;
+    const top = rect.y;
+    const right = left + rect.width;
+    const bottom = top + rect.height;
+
+    if (Rect.containsPoint(rect, point)) {
+      const distanceLeft = left - result.x;
+      const distanceTop = top - result.y;
+      const distanceRight = right - result.x;
+      const distanceBottom = bottom - result.y;
+      const xMin = Math.min(distanceLeft, distanceRight);
+      const yMin = Math.min(distanceTop, distanceBottom);
       const distanceMin = Math.min(xMin, yMin);
-      const result = { ...point };
 
-      if (distanceMin === distanceTopLeft.x) {
-        result.x = getLeft(rect);
-      } else if (distanceMin === distanceBottomRight.x) {
-        result.x = getRight(rect);
+      if (distanceMin === distanceLeft) {
+        result.x = left;
+      } else if (distanceMin === distanceRight) {
+        result.x = right;
       }
 
-      if (distanceMin === distanceTopLeft.y) {
-        result.y = getTop(rect);
-      } else if (distanceMin === distanceBottomRight.y) {
-        result.y = getBottom(rect);
+      if (distanceMin === distanceTop) {
+        result.y = top;
+      } else if (distanceMin === distanceBottom) {
+        result.y = bottom;
       }
 
       return result;
     }
 
-    return {
-      x: clamp(point.x, getLeft(rect), getRight(rect)),
-      y: clamp(point.y, getTop(rect), getBottom(rect)),
-    };
+    result.x = clamp(point.x, { min: left, max: right });
+    result.y = clamp(point.y, { min: top, max: bottom });
+
+    return result;
   }
 
-  export function containsPoint(rect: Rect, point: Point2): boolean {
+  public static containsPoint(
+    rect: Readonly<RectLike>,
+    point: Readonly<Pnt2Like>,
+  ): boolean {
     return (
-      point.x >= getLeft(rect) &&
-      point.x <= getRight(rect) &&
-      point.y >= getTop(rect) &&
-      point.y <= getBottom(rect)
+      rect.x <= point.x &&
+      rect.x + rect.width >= point.x &&
+      rect.y <= point.y &&
+      rect.y + rect.height >= point.y
     );
   }
 
-  export function containsRect(rect1: Rect, rect2: Rect): boolean {
+  public static containsRect(
+    first: Readonly<RectLike>,
+    second: Readonly<RectLike>,
+  ): boolean {
     return (
-      getLeft(rect2) >= getLeft(rect1) &&
-      getRight(rect2) <= getRight(rect1) &&
-      getTop(rect2) >= getTop(rect1) &&
-      getBottom(rect2) <= getBottom(rect1)
+      first.x <= second.x &&
+      first.x + first.width >= second.x + second.width &&
+      first.y <= second.y &&
+      first.y + first.height >= second.y + second.height
     );
   }
 
-  export function containsCircle(rect: Rect, circle: Circle): boolean {
-    if (!containsPoint(rect, circle.center)) {
+  public static containsCircle(
+    rect: Readonly<RectLike>,
+    circle: Readonly<CircleLike>,
+  ): boolean {
+    if (!Rect.containsPoint(rect, circle.center)) {
       return false;
     }
 
-    const closestPoint = getClosestPoint(rect, circle.center);
-    const distanceSquared = Point.distanceSquared(closestPoint, circle.center);
+    const closestPoint = Rect.getClosestPoint(rect, circle.center);
+    const distanceSquared = closestPoint.distanceToSquared(circle.center);
     const radiusSquared = Math.pow(circle.radius, 2);
 
     return radiusSquared <= distanceSquared;
   }
 
-  export function overlapsRect(rect1: Rect, rect2: Rect): boolean {
+  public static overlapsRect(
+    first: Readonly<RectLike>,
+    second: Readonly<RectLike>,
+  ): boolean {
     return (
-      getLeft(rect2) <= getRight(rect1) &&
-      getRight(rect2) >= getLeft(rect1) &&
-      getTop(rect2) <= getBottom(rect1) &&
-      getBottom(rect2) >= getTop(rect1)
+      first.x + first.width >= second.x &&
+      first.x <= second.x + second.width &&
+      first.y + first.height >= second.y &&
+      first.y <= second.y + second.height
     );
   }
 
-  export function overlapsCircle(rect: Rect, circle: Circle): boolean {
-    if (containsPoint(rect, circle.center)) {
+  public static overlapsCircle(
+    rect: Readonly<RectLike>,
+    circle: Readonly<CircleLike>,
+  ): boolean {
+    if (Rect.containsPoint(rect, circle.center)) {
       return true;
     }
 
-    const closestPoint = getClosestPoint(rect, circle.center);
+    const closestPoint = Rect.getClosestPoint(rect, circle.center);
 
     return Circle.containsPoint(circle, closestPoint);
   }
 
-  export function getIntersectionRect(rect1: Rect, rect2: Rect): Rect | null {
-    const xMin = Math.max(getLeft(rect1), getLeft(rect2));
-    const xMax = Math.min(getRight(rect1), getRight(rect2));
-    const yMin = Math.max(getTop(rect1), getTop(rect2));
-    const yMax = Math.min(getBottom(rect1), getBottom(rect2));
+  public static getRectIntersectionPoints(
+    first: Readonly<RectLike>,
+    second: Readonly<RectLike>,
+  ): Pnt2[] {
+    if (!Rect.overlapsRect(first, second)) {
+      return [];
+    }
+
+    const edges1 = Rect.getEdges(first);
+    const edges2 = Rect.getEdges(second);
+    const intersections: Pnt2[] = [];
+
+    for (const edge1 of edges1) {
+      for (const edge2 of edges2) {
+        const intersectionPoint = Line2.intersectLine(edge1, edge2);
+
+        if (intersectionPoint) {
+          intersections.push(intersectionPoint);
+        }
+      }
+    }
+
+    return intersections;
+  }
+
+  public static getCircleIntersectionPoints(
+    rect: Readonly<RectLike>,
+    circle: Readonly<CircleLike>,
+  ): Pnt2[] {
+    const edges = Rect.getEdges(rect);
+    const intersections: Pnt2[] = [];
+
+    for (const edge of edges) {
+      const intersection = Line2.intersectCircle(edge, circle);
+
+      if (intersection) {
+        intersections.push(...intersection);
+      }
+    }
+
+    return intersections;
+  }
+
+  public static intersectRect(
+    first: Readonly<RectLike>,
+    second: Readonly<RectLike>,
+  ): Rect | null {
+    const xMin = Math.max(first.x, second.x);
+    const xMax = Math.min(first.x + first.width, second.x + second.width);
+    const yMin = Math.max(first.y, second.y);
+    const yMax = Math.min(first.y + first.height, second.y + second.height);
     const width = xMax - xMin;
     const height = yMax - yMin;
 
@@ -147,6 +326,100 @@ export namespace Rect {
       return null;
     }
 
-    return { position: { x: xMin, y: yMin }, size: { width, height } };
+    return new Rect(xMin, yMin, width, height);
+  }
+
+  public static intersectCircle(
+    rect: Readonly<RectLike>,
+    circle: Readonly<CircleLike>,
+  ): Rect | null {
+    // TODO not accurate
+    return Rect.intersectRect(rect, Circle.getBoundingRect(circle));
+  }
+
+  public static getBoundingRect(rect: Readonly<RectLike>): Rect {
+    return Rect.from(rect);
+  }
+
+  public static equals(
+    first: Readonly<RectLike>,
+    second: Readonly<RectLike>,
+    epsilon = Number.EPSILON,
+  ): boolean {
+    return (
+      Math.abs(first.x - second.x) < epsilon &&
+      Math.abs(first.y - second.y) < epsilon &&
+      Math.abs(first.x + first.width - second.x + second.width) < epsilon &&
+      Math.abs(first.y + first.height - second.y + second.height) < epsilon
+    );
+  }
+
+  public getClosestPoint(point: Readonly<Pnt2Like>): Pnt2 {
+    return Rect.getClosestPoint(this, point);
+  }
+
+  public containsPoint(point: Readonly<Pnt2Like>): boolean {
+    return Rect.containsPoint(this, point);
+  }
+
+  public containsRect(rect: Readonly<RectLike>): boolean {
+    return Rect.containsRect(this, rect);
+  }
+
+  public containsCircle(circle: Readonly<CircleLike>): boolean {
+    return Rect.containsCircle(this, circle);
+  }
+
+  public overlapsRect(rect: Readonly<RectLike>): boolean {
+    return Rect.overlapsRect(this, rect);
+  }
+
+  public overlapsCircle(circle: Readonly<CircleLike>): boolean {
+    return Rect.overlapsCircle(this, circle);
+  }
+
+  public getRectIntersectionPoints(rect: Readonly<RectLike>): Pnt2[] {
+    return Rect.getRectIntersectionPoints(this, rect);
+  }
+
+  public getCircleIntersectionPoints(circle: Readonly<CircleLike>): Pnt2[] {
+    return Rect.getCircleIntersectionPoints(this, circle);
+  }
+
+  public intersectRect(rect: Readonly<RectLike>): Rect | null {
+    return Rect.intersectRect(this, rect);
+  }
+
+  public intersectCircle(circle: Readonly<CircleLike>): Rect | null {
+    return Rect.intersectCircle(this, circle);
+  }
+
+  public getBoundingRect(): Rect {
+    return Rect.getBoundingRect(this);
+  }
+
+  public equals(other: Readonly<RectLike>, epsilon = Number.EPSILON): boolean {
+    return Rect.equals(this, other, epsilon);
+  }
+
+  public copy(other: Readonly<RectLike>): this {
+    this.x = other.x;
+    this.y = other.y;
+    this.width = other.width;
+    this.height = other.height;
+    return this;
+  }
+
+  public clone(): Rect {
+    return new Rect(this.x, this.y, this.width, this.height);
+  }
+
+  public toString(): string {
+    const x = this.x.toFixed(1);
+    const y = this.y.toFixed(1);
+    const width = this.width.toFixed(1);
+    const height = this.height.toFixed(1);
+
+    return `Rect(x:${x}, y:${y}, w:${width}, h:${height})`;
   }
 }

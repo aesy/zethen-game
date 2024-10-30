@@ -1,4 +1,4 @@
-import { Vector2 } from "@/engine/math/vector";
+import { Vec2 } from "@/engine/math/vec2";
 import { Component, ComponentId } from "@/engine/component";
 
 export class Physical implements Component {
@@ -6,6 +6,6 @@ export class Physical implements Component {
 
   constructor(
     public mass: number,
-    public velocity: Vector2 = Vector2.zero(),
+    public velocity: Vec2 = Vec2.zero(),
   ) {}
 }

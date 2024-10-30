@@ -44,6 +44,16 @@ export class Priorityqueue<T> {
     return this.data.length;
   }
 
+  public forEach(
+    callbackfn: (value: T, index: number, array: this) => void,
+    thisArg?: unknown,
+  ): void {
+    this.data.forEach(
+      ([_, value], index) => callbackfn(value, index, this),
+      thisArg,
+    );
+  }
+
   *[Symbol.iterator](): Iterator<T> {
     for (const [_, value] of this.data) {
       yield value;

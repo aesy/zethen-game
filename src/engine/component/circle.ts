@@ -1,4 +1,4 @@
-import { Color } from "@/engine/math/color";
+import { Rgba } from "@/engine/math/rgba";
 import { Component, ComponentId } from "@/engine/component";
 
 export class Circle implements Component {
@@ -6,6 +6,6 @@ export class Circle implements Component {
 
   constructor(
     public radius: number,
-    public color: Color,
+    public color: Rgba,
   ) {}
 }

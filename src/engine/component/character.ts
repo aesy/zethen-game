@@ -28,5 +28,6 @@ export class Character implements Component {
   public constructor(
     public locationState: LocationState,
     public movementState: MovementState,
+    public facingDirection: FacingDirection,
   ) {}
 }

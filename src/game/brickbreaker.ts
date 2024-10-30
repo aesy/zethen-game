@@ -1,5 +1,4 @@
-import { MoveSystem } from "@/engine/system/move";
-import { ControlSystem } from "@/engine/system/control";
+import { PlayerControlSystem } from "@/engine/system/player";
 import { CollisionSystem } from "@/engine/system/collision";
 import { AnimationSystem } from "@/engine/system/animation";
 import { ShapeRenderer } from "@/engine/renderer/shape";
@@ -43,6 +42,8 @@ export function createBrickBreakerGame(): Game {
     desynchronized: true,
   });
 
+  // const context = WebGL.fromCanvas(canvas, true);
+
   if (!context) {
     throw new Error("2D canvas is not supported :-(");
   }
@@ -51,9 +52,9 @@ export function createBrickBreakerGame(): Game {
   const {
     scene: { systems, entities },
   } = game;
-  systems.add(new ControlSystem());
+  systems.add(new PlayerControlSystem());
   // systems.add(new GravitySystem());
-  systems.add(new MoveSystem());
+  // systems.add(new MoveSystem());
   systems.add(new AnimationSystem());
   systems.add(new CollisionSystem());
   systems.add(new ShapeRenderer(context));
@@ -61,6 +62,7 @@ export function createBrickBreakerGame(): Game {
   systems.add(new ColliderDebugRenderer(context));
   systems.add(new CollisionDebugRenderer(context));
   systems.add(new VelocityDebugRenderer(context, 0.2));
+  // systems.add(new WebGLRenderer(context));
 
   void createPlayer(entities);
 
@@ -68,7 +70,7 @@ export function createBrickBreakerGame(): Game {
     createBall(entities);
   }
 
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 10; i++) {
     createBox(entities);
   }
 

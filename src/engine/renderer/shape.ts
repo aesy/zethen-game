@@ -19,9 +19,7 @@ export class ShapeRenderer implements System {
     const ctx = this.context;
     const canvas = ctx.canvas;
 
-    // TODO use clearRect instead
-    ctx.fillStyle = "gray";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   private renderBoxes(entities: EntityManager): void {
@@ -33,7 +31,7 @@ export class ShapeRenderer implements System {
         transform: { position },
         rectangle: { size, color },
       } = box;
-      ctx.fillStyle = color.toString();
+      ctx.fillStyle = color.toRgbCssString();
       ctx.fillRect(position.x, position.y, size.width, size.height);
     }
   }
@@ -49,7 +47,7 @@ export class ShapeRenderer implements System {
       } = ball;
 
       ctx.beginPath();
-      ctx.fillStyle = color.toString();
+      ctx.fillStyle = color.toRgbCssString();
       ctx.arc(position.x, position.y, radius, 0, PI2);
       ctx.fill();
     }

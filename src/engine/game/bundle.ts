@@ -1,5 +1,5 @@
 import { Scene } from "@/engine/game/scene";
 
-export interface Bundle {
+export type Bundle = {
   init(scene: Scene): void;
-}
+};

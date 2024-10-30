@@ -1,71 +1,77 @@
 import { System } from "@/engine/system";
-import { Vector2 } from "@/engine/math/vector";
-import { Point } from "@/engine/math/point";
+import { Rect } from "@/engine/math/rect";
+import { Circle } from "@/engine/math/circle";
 import { Scene } from "@/engine/game/scene";
-import { EntityOf } from "@/engine/entity";
 import { Movable } from "@/engine/archetype/movable";
-import { Ball } from "@/engine/archetype/ball";
 
 export class CollisionSystem implements System {
   public update({ entities }: Scene, _dt: number): void {
-    const balls = entities.queryAllEntities(Ball);
+    const movables = entities
+      .queryAllEntities(Movable)
+      .filter((movable) => Boolean(movable.collidable));
 
-    for (let i = 0; i < balls.length; i++) {
-      for (let j = i + 1; j < balls.length; j++) {
-        const movable1 = balls[i];
-        const movable2 = balls[j];
+    for (let i = 0; i < movables.length; i++) {
+      const movable1 = movables[i];
+      const { transform: transform1, collidable: collidable1 } = movable1;
+      const { collider: collider1 } = collidable1!;
 
-        if (!isOverlapping(movable1, movable2)) {
-          break;
+      for (let j = i + 1; j < movables.length; j++) {
+        const movable2 = movables[j];
+        const { transform: transform2, collidable: collidable2 } = movable2;
+        const { collider: collider2 } = collidable2!;
+
+        if (collider1 instanceof Circle && collider2 instanceof Circle) {
+          const circle1 = Circle.from({
+            center: collider1.center.clone().add(transform1.position),
+            radius: collider1.radius * transform1.scale.width,
+          });
+          const circle2 = Circle.from({
+            center: collider2.center.clone().add(transform2.position),
+            radius: collider2.radius * transform2.scale.width,
+          });
+        } else if (collider1 instanceof Rect && collider2 instanceof Rect) {
+          const rect1 = Rect.from({
+            x: collider1.x + transform1.position.x,
+            y: collider1.y + transform1.position.y,
+            width: collider1.width * transform1.scale.width,
+            height: collider1.height * transform1.scale.height,
+          });
+          const rect2 = Rect.from({
+            x: collider2.x + transform2.position.x,
+            y: collider2.y + transform2.position.y,
+            width: collider2.width * transform2.scale.width,
+            height: collider2.height * transform2.scale.height,
+          });
+        } else if (collider1 instanceof Circle && collider2 instanceof Rect) {
+          const circle = Circle.from({
+            center: collider1.center.clone().add(transform1.position),
+            radius: collider1.radius * transform1.scale.width,
+          });
+          const rect = Rect.from({
+            x: collider2.x + transform2.position.x,
+            y: collider2.y + transform2.position.y,
+            width: collider2.width * transform2.scale.width,
+            height: collider2.height * transform2.scale.height,
+          });
+        } else if (collider1 instanceof Rect && collider2 instanceof Circle) {
+          const rect = Rect.from({
+            x: collider1.x + transform1.position.x,
+            y: collider1.y + transform1.position.y,
+            width: collider1.width * transform1.scale.width,
+            height: collider1.height * transform1.scale.height,
+          });
+          const circle = Circle.from({
+            center: collider2.center.clone().add(transform2.position),
+            radius: collider2.radius * transform2.scale.width,
+          });
         }
-
-        const collisionDirection = getCollisionDirection(movable1, movable2);
-        const speed = getCollisionVelocity(movable1, movable2);
-
-        if (speed < 0) {
-          break;
-        }
-
-        collisionDirection.magnitude = speed;
-        movable1.physical!.velocity.subtract(collisionDirection);
-        movable2.physical!.velocity.add(collisionDirection);
       }
     }
   }
-}
 
-function isOverlapping(
-  ball1: EntityOf<typeof Ball>,
-  ball2: EntityOf<typeof Ball>,
-): boolean {
-  const distanceSquared = Point.distanceSquared(
-    ball1.transform.position,
-    ball2.transform.position,
-  );
-  const radiusSumSquared = Math.pow(
-    ball1.circle.radius + ball2.circle.radius,
-    2,
-  );
+  private handleCircleCircleCollision(): void {}
 
-  return distanceSquared <= radiusSumSquared;
-}
+  private handleRectRectCollision(): void {}
 
-function getCollisionDirection(
-  movable1: EntityOf<typeof Movable>,
-  movable2: EntityOf<typeof Movable>,
-): Vector2 {
-  return Vector2.fromPoint(movable2.transform.position)
-    .subtract(movable1.transform.position)
-    .normalize();
-}
-
-function getCollisionVelocity(
-  movable1: EntityOf<typeof Movable>,
-  movable2: EntityOf<typeof Movable>,
-): number {
-  const collisionDirection = getCollisionDirection(movable1, movable2);
-
-  return Vector2.fromPoint(movable1.physical!.velocity)
-    .subtract(movable2.physical!.velocity)
-    .dot(collisionDirection);
+  private handleCircleRectCollision(): void {}
 }

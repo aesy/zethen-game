@@ -1,23 +1,22 @@
-import { Vector2 } from "@/engine/math/vector";
-import { Point2 } from "@/engine/math/point";
-import { Dimension2 } from "@/engine/math/dimension";
+import { Pnt3, Pnt3Like } from "@/engine/math/pnt3";
+import { Dim3 } from "@/engine/math/dim3";
 import { Component, ComponentId } from "@/engine/component";
 
-export class Transform implements Component {
+export class Transform3D implements Component {
   public static readonly id: ComponentId = ComponentId.next();
 
   constructor(
-    public readonly position: Point2,
+    public readonly position: Pnt3,
     public rotation: number = 0,
-    public readonly scale: Dimension2 = { width: 1, height: 1 },
+    public readonly scale = new Dim3(1, 1, 1),
   ) {}
 
-  public translate(point: Point2): void {
+  public translate(point: Readonly<Pnt3Like>): void {
     this.position.x += point.x;
     this.position.y += point.y;
   }
 
-  public rescale(vector: Vector2): void {
+  public rescale(vector: Readonly<Pnt3Like>): void {
     this.scale.width *= vector.x;
     this.scale.height *= vector.y;
   }

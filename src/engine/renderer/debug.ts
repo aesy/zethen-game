@@ -1,13 +1,12 @@
 import { System } from "@/engine/system";
-import { Vector2 } from "@/engine/math/vector";
-import { Rect } from "@/engine/math/rect";
-import { Point } from "@/engine/math/point";
-import { Color } from "@/engine/math/color";
-import { Collision } from "@/engine/math/collision";
+import { Vec2 } from "@/engine/math/vec2";
+import { Rgba } from "@/engine/math/rgba";
+import { Rect, RectLike } from "@/engine/math/rect";
+import { Pnt2Like } from "@/engine/math/pnt2";
 import { Circle } from "@/engine/math/circle";
 import { Scene } from "@/engine/game/scene";
 import { Query } from "@/engine/entity/query";
-import { Transform } from "@/engine/component/transform";
+import { Transform2D } from "@/engine/component/transform2D";
 import { Collidable } from "@/engine/component/collidable";
 import { Movable } from "@/engine/archetype/movable";
 
@@ -48,6 +47,9 @@ export class VelocityDebugRenderer implements System {
 }
 
 export class CollisionDebugRenderer implements System {
+  private static readonly INTERSECTION_POINT_COLOR = new Rgba(255, 0, 0, 0.8);
+  private static readonly INTERSECTION_BOX_COLOR = new Rgba(255, 0, 0, 0.4);
+
   constructor(private readonly context: CanvasRenderingContext2D) {}
 
   public update({ entities }: Scene, _dt: number): void {
@@ -65,105 +67,97 @@ export class CollisionDebugRenderer implements System {
         const { transform: transform2, collidable: collidable2 } = movable2;
         const { collider: collider2 } = collidable2!;
 
-        if (Circle.isInstance(collider1) && Circle.isInstance(collider2)) {
-          const circle1 = {
-            center: Point.add(collider1.center, transform1.position),
+        if (collider1 instanceof Circle && collider2 instanceof Circle) {
+          const circle1 = Circle.from({
+            center: collider1.center.clone().add(transform1.position),
             radius: collider1.radius * transform1.scale.width,
-          } satisfies Circle;
-          const circle2 = {
-            center: Point.add(collider2.center, transform2.position),
+          });
+          const circle2 = Circle.from({
+            center: collider2.center.clone().add(transform2.position),
             radius: collider2.radius * transform2.scale.width,
-          } satisfies Circle;
+          });
 
-          if (Circle.overlapsCircle(circle1, circle2)) {
-            this.renderCollision({
-              position: circle1.center,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
-            this.renderCollision({
-              position: circle2.center,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
-          }
-        } else if (Rect.isInstance(collider1) && Rect.isInstance(collider2)) {
-          const rect1 = {
-            position: Point.add(collider1.position, transform1.position),
-            size: {
-              width: collider1.size.width * transform1.scale.width,
-              height: collider1.size.height * transform1.scale.height,
-            },
-          } satisfies Rect;
-          const rect2 = {
-            position: Point.add(collider2.position, transform2.position),
-            size: {
-              width: collider2.size.width * transform2.scale.width,
-              height: collider2.size.height * transform2.scale.height,
-            },
-          } satisfies Rect;
+          const points = Circle.getCircleIntersectionPoints(circle1, circle2);
 
-          if (Rect.overlapsRect(rect1, rect2)) {
-            this.renderCollision({
-              position: rect1.position,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
-            this.renderCollision({
-              position: rect2.position,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
+          for (const point of points) {
+            this.renderIntersectionPoint(point);
           }
-        } else if (Circle.isInstance(collider1) && Rect.isInstance(collider2)) {
-          const circle = {
-            center: Point.add(collider1.center, transform1.position),
+
+          const intersection = Circle.intersectCircle(circle1, circle2);
+
+          if (intersection) {
+            this.renderCollisionBox(intersection);
+          }
+        } else if (collider1 instanceof Rect && collider2 instanceof Rect) {
+          const rect1 = Rect.from({
+            x: collider1.x + transform1.position.x,
+            y: collider1.y + transform1.position.y,
+            width: collider1.width * transform1.scale.width,
+            height: collider1.height * transform1.scale.height,
+          });
+          const rect2 = Rect.from({
+            x: collider2.x + transform2.position.x,
+            y: collider2.y + transform2.position.y,
+            width: collider2.width * transform2.scale.width,
+            height: collider2.height * transform2.scale.height,
+          });
+
+          const points = Rect.getRectIntersectionPoints(rect1, rect2);
+
+          for (const point of points) {
+            this.renderIntersectionPoint(point);
+          }
+
+          const intersection = Rect.intersectRect(rect1, rect2);
+
+          if (intersection) {
+            this.renderCollisionBox(intersection);
+          }
+        } else if (collider1 instanceof Circle && collider2 instanceof Rect) {
+          const circle = Circle.from({
+            center: collider1.center.clone().add(transform1.position),
             radius: collider1.radius * transform1.scale.width,
-          } satisfies Circle;
-          const rect = {
-            position: Point.add(collider2.position, transform2.position),
-            size: {
-              width: collider2.size.width * transform2.scale.width,
-              height: collider2.size.height * transform2.scale.height,
-            },
-          } satisfies Rect;
+          });
+          const rect = Rect.from({
+            x: collider2.x + transform2.position.x,
+            y: collider2.y + transform2.position.y,
+            width: collider2.width * transform2.scale.width,
+            height: collider2.height * transform2.scale.height,
+          });
 
-          if (Circle.overlapsRect(circle, rect)) {
-            this.renderCollision({
-              position: circle.center,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
-            this.renderCollision({
-              position: rect.position,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
+          const points = Rect.getCircleIntersectionPoints(rect, circle);
+
+          for (const point of points) {
+            this.renderIntersectionPoint(point);
           }
-        } else if (Rect.isInstance(collider1) && Circle.isInstance(collider2)) {
-          const rect = {
-            position: Point.add(collider1.position, transform1.position),
-            size: {
-              width: collider1.size.width * transform1.scale.width,
-              height: collider1.size.height * transform1.scale.height,
-            },
-          } satisfies Rect;
-          const circle = {
-            center: Point.add(collider2.center, transform2.position),
-            radius: collider2.radius * transform2.scale.width,
-          } satisfies Circle;
 
-          if (Rect.overlapsCircle(rect, circle)) {
-            this.renderCollision({
-              position: rect.position,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
-            this.renderCollision({
-              position: circle.center,
-              normal: Vector2.zero(),
-              direction: Vector2.zero(),
-            });
+          const intersection = Rect.intersectCircle(rect, circle);
+
+          if (intersection) {
+            this.renderCollisionBox(intersection);
+          }
+        } else if (collider1 instanceof Rect && collider2 instanceof Circle) {
+          const rect = Rect.from({
+            x: collider1.x + transform1.position.x,
+            y: collider1.y + transform1.position.y,
+            width: collider1.width * transform1.scale.width,
+            height: collider1.height * transform1.scale.height,
+          });
+          const circle = Circle.from({
+            center: collider2.center.clone().add(transform2.position),
+            radius: collider2.radius * transform2.scale.width,
+          });
+
+          const points = Rect.getCircleIntersectionPoints(rect, circle);
+
+          for (const point of points) {
+            this.renderIntersectionPoint(point);
+          }
+
+          const intersection = Rect.intersectCircle(rect, circle);
+
+          if (intersection) {
+            this.renderCollisionBox(intersection);
           }
         }
       }
@@ -176,19 +170,29 @@ export class CollisionDebugRenderer implements System {
 
   private handleCircleRectCollision(): void {}
 
-  private renderCollision(collision: Collision): void {
+  private renderIntersectionPoint(point: Readonly<Pnt2Like>): void {
     const ctx = this.context;
-    const { position } = collision;
 
     ctx.beginPath();
-    ctx.fillStyle = "purple";
-    ctx.arc(position.x, position.y, 20, 0, PI2);
+    ctx.fillStyle =
+      CollisionDebugRenderer.INTERSECTION_POINT_COLOR.toRgbCssString();
+    ctx.arc(point.x, point.y, 4, 0, PI2);
     ctx.fill();
+  }
+
+  private renderCollisionBox(rect: Readonly<RectLike>): void {
+    const ctx = this.context;
+
+    ctx.beginPath();
+    ctx.fillStyle =
+      CollisionDebugRenderer.INTERSECTION_BOX_COLOR.toRgbCssString();
+    ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
   }
 }
 
 export class ColliderDebugRenderer implements System {
-  private static readonly COLOR = Color.fromRGB(128, 0, 128, 0.5);
+  private static readonly STROKE_COLOR = new Rgba(128, 0, 128, 0.5);
+  private static readonly FILL_COLOR = new Rgba(128, 0, 128, 0.2);
 
   constructor(private readonly context: CanvasRenderingContext2D) {}
 
@@ -197,7 +201,7 @@ export class ColliderDebugRenderer implements System {
     const movables = entities
       .queryAllEntities(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .single("collidable", Collidable),
       )
       .filter((movable) => Boolean(movable.collidable));
@@ -206,33 +210,33 @@ export class ColliderDebugRenderer implements System {
       const { transform, collidable } = movable;
       const { collider } = collidable!;
 
-      if (Circle.isInstance(collider)) {
-        const circle = {
-          center: Point.add(collider.center, transform.position),
+      if (collider instanceof Circle) {
+        const circle = Circle.from({
+          center: collider.center.clone().add(transform.position),
           radius: collider.radius * transform.scale.width,
-        } satisfies Circle;
+        });
 
         ctx.beginPath();
-        ctx.fillStyle = ColliderDebugRenderer.COLOR.toString();
-        ctx.arc(circle.center.x, circle.center.y, 20, 0, PI2);
-        ctx.fill();
-      } else if (Rect.isInstance(collider)) {
-        const rect = {
-          position: Point.add(collider.position, transform.position),
-          size: {
-            width: collider.size.width * transform.scale.width,
-            height: collider.size.height * transform.scale.height,
-          },
-        } satisfies Rect;
+        ctx.arc(circle.center.x, circle.center.y, circle.radius, 0, PI2);
 
-        ctx.fillStyle = ColliderDebugRenderer.COLOR.toString();
-        ctx.strokeStyle = ColliderDebugRenderer.COLOR.toString();
-        ctx.strokeRect(
-          rect.position.x,
-          rect.position.y,
-          rect.size.width,
-          rect.size.height,
-        );
+        ctx.fillStyle = ColliderDebugRenderer.FILL_COLOR.toRgbCssString();
+        ctx.fill();
+
+        ctx.strokeStyle = ColliderDebugRenderer.STROKE_COLOR.toRgbCssString();
+        ctx.stroke();
+      } else if (collider instanceof Rect) {
+        const rect = Rect.from({
+          x: collider.x + transform.position.x,
+          y: collider.y + transform.position.y,
+          width: collider.width * transform.scale.width,
+          height: collider.height * transform.scale.height,
+        });
+
+        ctx.fillStyle = ColliderDebugRenderer.FILL_COLOR.toRgbCssString();
+        ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+
+        ctx.strokeStyle = ColliderDebugRenderer.STROKE_COLOR.toRgbCssString();
+        ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
       }
     }
   }

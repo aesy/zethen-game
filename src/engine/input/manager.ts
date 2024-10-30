@@ -1,12 +1,12 @@
 import { bind } from "@/engine/util/decorator";
-import { Point2 } from "@/engine/math/point";
+import { Pnt2, Pnt2Like } from "@/engine/math/pnt2";
 
 export class InputManager {
-  private readonly mousePosition: Point2;
+  private readonly mousePosition: Pnt2Like;
   private readonly pressedKeys: Map<string, boolean>;
 
   constructor() {
-    this.mousePosition = { x: 0, y: 0 };
+    this.mousePosition = Pnt2.zero();
     this.pressedKeys = new Map();
 
     window.addEventListener("mousemove", this.handleMouseMove);
@@ -16,8 +16,8 @@ export class InputManager {
     window.addEventListener("keyup", this.handleKeyUp);
   }
 
-  public getMousePosition(): Point2 {
-    return { ...this.mousePosition };
+  public getMousePosition(): Readonly<Pnt2Like> {
+    return this.mousePosition;
   }
 
   public isKeyPressed(key: string): boolean {

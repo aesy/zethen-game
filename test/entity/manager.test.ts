@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { Point } from "@/engine/math/point";
+import { Pnt2 } from "@/engine/math/pnt2";
 import { Query } from "@/engine/entity/query";
 import { EntityManager } from "@/engine/entity/manager";
-import { Transform } from "@/engine/component/transform";
+import { Transform2D } from "@/engine/component/transform2D";
 import { Physical } from "@/engine/component/physical";
 import { Archetype } from "@/engine/archetype";
 
@@ -19,31 +19,31 @@ describe("EntityManager", () => {
 
     it("should be able to create an entity with components", () => {
       const em = new EntityManager();
-      const id1 = em.createEntity([new Transform(Point.ORIGIN)]);
+      const id1 = em.createEntity([new Transform2D(Pnt2.ORIGIN.clone())]);
       const id2 = em.createEntity([
-        new Transform(Point.ORIGIN),
+        new Transform2D(Pnt2.ORIGIN.clone()),
         new Physical(1),
       ]);
       em.createEntity();
 
       expect(id1).not.toEqual(id2);
       expect(em.getAllComponents(id1)).toHaveLength(1);
-      expect(em.getAllComponents(id2, Transform)).toHaveLength(1);
+      expect(em.getAllComponents(id2, Transform2D)).toHaveLength(1);
     });
   });
 
   describe("#createArchetype", () => {
     it("should create an entity with predefined components using an archetype", () => {
       const MyArchetype = Archetype.builder()
-        .single("transform", Transform)
+        .single("transform", Transform2D)
         .optional("physical", Physical)
         .build();
       const em = new EntityManager();
       const id1 = em.createArchetype(MyArchetype, {
-        transform: new Transform(Point.ORIGIN),
+        transform: new Transform2D(Pnt2.ORIGIN.clone()),
       });
       const id2 = em.createArchetype(MyArchetype, {
-        transform: new Transform(Point.ORIGIN),
+        transform: new Transform2D(Pnt2.ORIGIN.clone()),
         physical: new Physical(0),
       });
 
@@ -54,7 +54,7 @@ describe("EntityManager", () => {
   describe("#deleteEntity", () => {
     it("should delete an entity", () => {
       const em = new EntityManager();
-      const id = em.createEntity([new Transform(Point.ORIGIN)]);
+      const id = em.createEntity([new Transform2D(Pnt2.ORIGIN.clone())]);
 
       em.deleteEntity(id);
 
@@ -68,27 +68,27 @@ describe("EntityManager", () => {
       const id = em.createEntity();
       em.createEntity();
 
-      em.addComponent(id, new Transform(Point.ORIGIN));
+      em.addComponent(id, new Transform2D(Pnt2.ORIGIN.clone()));
 
-      expect(em.getAllComponents(id, Transform)).toHaveLength(1);
+      expect(em.getAllComponents(id, Transform2D)).toHaveLength(1);
     });
   });
 
   describe("#removeComponent", () => {
     it("should remove a component from an entity", () => {
       const em = new EntityManager();
-      const transform = new Transform(Point.ORIGIN);
+      const transform = new Transform2D(Pnt2.ORIGIN.clone());
       const id = em.createEntity([transform]);
       em.createEntity();
 
       em.removeComponent(id, transform);
 
-      expect(em.getAllComponents(id, Transform)).toHaveLength(0);
+      expect(em.getAllComponents(id, Transform2D)).toHaveLength(0);
     });
 
     it("should do nothing when trying to remove a component that does not exist", () => {
       const em = new EntityManager();
-      const transform = new Transform(Point.ORIGIN);
+      const transform = new Transform2D(Pnt2.ORIGIN.clone());
       const id = em.createEntity();
       em.createEntity();
 
@@ -101,12 +101,12 @@ describe("EntityManager", () => {
   describe("#getFirstComponent", () => {
     it("should return the first component added to an entity", () => {
       const em = new EntityManager();
-      const transform1 = new Transform(Point.ORIGIN);
-      const transform2 = new Transform(Point.ORIGIN);
+      const transform1 = new Transform2D(Pnt2.ORIGIN.clone());
+      const transform2 = new Transform2D(Pnt2.ORIGIN.clone());
       const id = em.createEntity([transform1, transform2]);
       em.createEntity();
 
-      expect(em.getFirstComponent(id, Transform)).toEqual(transform1);
+      expect(em.getFirstComponent(id, Transform2D)).toEqual(transform1);
     });
   });
 
@@ -116,10 +116,10 @@ describe("EntityManager", () => {
       em.createEntity();
       const id = em.createEntity([
         new Physical(0),
-        new Transform(Point.ORIGIN),
-        new Transform(Point.ORIGIN),
+        new Transform2D(Pnt2.ORIGIN.clone()),
+        new Transform2D(Pnt2.ORIGIN.clone()),
       ]);
-      em.createEntity([new Physical(0), new Transform(Point.ORIGIN)]);
+      em.createEntity([new Physical(0), new Transform2D(Pnt2.ORIGIN.clone())]);
 
       expect(em.getAllComponents(id)).toHaveLength(3);
     });
@@ -129,25 +129,25 @@ describe("EntityManager", () => {
       em.createEntity();
       const id = em.createEntity([
         new Physical(0),
-        new Transform(Point.ORIGIN),
-        new Transform(Point.ORIGIN),
+        new Transform2D(Pnt2.ORIGIN.clone()),
+        new Transform2D(Pnt2.ORIGIN.clone()),
       ]);
-      em.createEntity([new Physical(0), new Transform(Point.ORIGIN)]);
+      em.createEntity([new Physical(0), new Transform2D(Pnt2.ORIGIN.clone())]);
 
-      expect(em.getAllComponents(id, Transform)).toHaveLength(2);
+      expect(em.getAllComponents(id, Transform2D)).toHaveLength(2);
     });
   });
 
   describe("#queryFirstEntity", () => {
     it("should return the first component of an entity matching the given query", () => {
       const em = new EntityManager();
-      const transform = new Transform(Point.ORIGIN);
+      const transform = new Transform2D(Pnt2.ORIGIN.clone());
       const id = em.createEntity([transform, new Physical(0)]);
       em.createEntity();
 
       const entity = em.queryFirstEntity(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
 
@@ -159,19 +159,19 @@ describe("EntityManager", () => {
     it("should return the same result when called twice", () => {
       const em = new EntityManager();
       const id = em.createEntity([
-        new Transform(Point.ORIGIN),
+        new Transform2D(Pnt2.ORIGIN.clone()),
         new Physical(0),
       ]);
       em.createEntity();
 
       const entity1 = em.queryFirstEntity(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
       const entity2 = em.queryFirstEntity(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
 
@@ -181,7 +181,7 @@ describe("EntityManager", () => {
 
     it("should not return an entity if not matching a query after a mandatory component was removed", () => {
       const em = new EntityManager();
-      const transform = new Transform(Point.ORIGIN);
+      const transform = new Transform2D(Pnt2.ORIGIN.clone());
       const id = em.createEntity([transform, new Physical(0)]);
       em.createEntity();
 
@@ -189,7 +189,7 @@ describe("EntityManager", () => {
 
       const entity = em.queryFirstEntity(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
 
@@ -201,11 +201,11 @@ describe("EntityManager", () => {
       const id = em.createEntity([new Physical(0)]);
       em.createEntity();
 
-      em.addComponent(id, new Transform(Point.ORIGIN));
+      em.addComponent(id, new Transform2D(Pnt2.ORIGIN.clone()));
 
       const entity = em.queryFirstEntity(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
 
@@ -217,15 +217,15 @@ describe("EntityManager", () => {
     it("should return all components of an entity matching the given query", () => {
       const em = new EntityManager();
       const id1 = em.createEntity([
-        new Transform(Point.ORIGIN),
+        new Transform2D(Pnt2.ORIGIN.clone()),
         new Physical(0),
       ]);
-      const id2 = em.createEntity([new Transform(Point.ORIGIN)]);
+      const id2 = em.createEntity([new Transform2D(Pnt2.ORIGIN.clone())]);
       em.createEntity();
 
       const entities = em.queryAllEntities(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
 
@@ -238,19 +238,19 @@ describe("EntityManager", () => {
       const em = new EntityManager();
       em.createEntity();
       const id = em.createEntity([
-        new Transform(Point.ORIGIN),
+        new Transform2D(Pnt2.ORIGIN.clone()),
         new Physical(0),
       ]);
       em.createEntity();
 
       const entities1 = em.queryAllEntities(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
       const entities2 = em.queryAllEntities(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .optional("physical", Physical),
       );
 
@@ -262,12 +262,12 @@ describe("EntityManager", () => {
   describe("#queryAllEntities", () => {
     it("should query entities by component", () => {
       const em = new EntityManager();
-      em.createEntity([new Transform(Point.ORIGIN)]);
-      em.createEntity([new Transform(Point.ORIGIN), new Physical(1)]);
+      em.createEntity([new Transform2D(Pnt2.ORIGIN.clone())]);
+      em.createEntity([new Transform2D(Pnt2.ORIGIN.clone()), new Physical(1)]);
       em.createEntity();
 
       const entities = em.queryAllEntities(
-        Query.create().single("transform", Transform),
+        Query.create().single("transform", Transform2D),
       );
 
       expect(entities).toHaveLength(2);
@@ -278,13 +278,13 @@ describe("EntityManager", () => {
 
     it("should  query entities by components", () => {
       const em = new EntityManager();
-      em.createEntity([new Transform(Point.ORIGIN)]);
-      em.createEntity([new Transform(Point.ORIGIN), new Physical(1)]);
+      em.createEntity([new Transform2D(Pnt2.ORIGIN.clone())]);
+      em.createEntity([new Transform2D(Pnt2.ORIGIN.clone()), new Physical(1)]);
       em.createEntity();
 
       const entities = em.queryAllEntities(
         Query.create()
-          .single("transform", Transform)
+          .single("transform", Transform2D)
           .single("physical", Physical),
       );
 
@@ -295,8 +295,8 @@ describe("EntityManager", () => {
 
     it("should query all entities", () => {
       const em = new EntityManager();
-      em.createEntity([new Transform(Point.ORIGIN)]);
-      em.createEntity([new Transform(Point.ORIGIN), new Physical(1)]);
+      em.createEntity([new Transform2D(Pnt2.ORIGIN.clone())]);
+      em.createEntity([new Transform2D(Pnt2.ORIGIN.clone()), new Physical(1)]);
       em.createEntity();
 
       const entities = em.queryAllEntities(Query.ALL);

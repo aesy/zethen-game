@@ -4,3 +4,5 @@ export const ARROW_LEFT = "ArrowLeft";
 export const ARROW_RIGHT = "ArrowRight";
 export const MOUSE_LEFT = "M1";
 export const MOUSE_RIGHT = "M2";
+export const SHIFT = "Shift";
+export const SPACE = " ";

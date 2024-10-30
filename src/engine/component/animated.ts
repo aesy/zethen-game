@@ -1,42 +1,19 @@
 import { Component, ComponentId } from "@/engine/component";
 
-export interface Animation {
+export type Animation = {
   getFrame(): CanvasImageSource;
   tick(dt: number): void;
-  play(): void;
+  resume(): void;
   pause(): void;
   stop(): void;
-}
+  reset(): void;
+};
 
-class StateAnimator<T extends string | number | symbol> implements Animation {
-  constructor(
-    private states: Record<T, Animation>,
-    private currentState: T,
-  ) {}
-
-  public setState(state: T) {
-    this.currentState = state;
-  }
-
-  public getFrame(): CanvasImageSource {
-    return this.states[this.currentState].getFrame();
-  }
-
-  public tick(dt: number): void {
-    this.states[this.currentState].tick(dt);
-  }
-
-  public play(): void {
-    this.states[this.currentState].play();
-  }
-
-  public pause(): void {
-    this.states[this.currentState].pause();
-  }
-
-  public stop(): void {
-    this.states[this.currentState].stop();
-  }
+export enum CharacterAnimation {
+  IDLE = "IDLE",
+  WALKING = "WALKING",
+  RUNNING = "RUNNING",
+  JUMPING = "JUMPING",
 }
 
 export class FrameAnimation implements Animation {
@@ -68,7 +45,7 @@ export class FrameAnimation implements Animation {
     }
   }
 
-  public play(): void {
+  public resume(): void {
     this.playing = true;
   }
 
@@ -89,6 +66,46 @@ export class FrameAnimation implements Animation {
 
 export class Animated implements Component {
   public static readonly id: ComponentId = ComponentId.next();
+  public speedModifier: number = 1;
 
-  public constructor(public animation: Animation) {}
+  constructor(
+    private animations: Record<string, Animation>,
+    private currentState: string,
+  ) {}
+
+  public play(name: string) {
+    if (name !== this.currentState) {
+      if (this.animations.hasOwnProperty(name)) {
+        this.reset();
+        this.currentState = name;
+      } else {
+        console.warn(`Tried to set non-existent animatino ${name}`);
+      }
+    }
+  }
+
+  public getImage(): CanvasImageSource {
+    return this.animations[this.currentState].getFrame();
+  }
+
+  public tick(dt: number): void {
+    this.animations[this.currentState].tick(dt * this.speedModifier);
+  }
+
+  public resume(): void {
+    this.animations[this.currentState].resume();
+  }
+
+  public pause(): void {
+    this.animations[this.currentState].pause();
+  }
+
+  public stop(): void {
+    this.animations[this.currentState].stop();
+  }
+
+  public reset(): void {
+    this.speedModifier = 1;
+    this.animations[this.currentState].reset();
+  }
 }

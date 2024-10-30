@@ -11,16 +11,31 @@ export class ImageRenderer implements System {
 
     for (const renderable of renderables) {
       const { transform, drawable } = renderable;
-      const { content, size, position } = drawable;
+      const { content, size, position, centered, flipX, flipY } = drawable;
 
+      ctx.save();
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(
-        content,
-        transform.position.x + position.x - size.width / 2,
-        transform.position.y + position.y - size.height / 2,
-        size.width,
-        size.height,
-      );
+
+      let x = transform.position.x + position.x;
+      let y = transform.position.y + position.y;
+
+      if (centered) {
+        x -= size.width / 2;
+        y -= size.height / 2;
+      }
+
+      if (flipX) {
+        ctx.scale(-1, 1);
+        x = -x - size.width;
+      }
+
+      if (flipY) {
+        ctx.scale(-1, 1);
+        y = -y - size.height;
+      }
+
+      ctx.drawImage(content, x, y, size.width, size.height);
+      ctx.restore();
     }
   }
 }

@@ -18,3 +18,10 @@ export function remap(value: number, from: Range, to: Range): number {
     ((value - from.min) / (from.max - from.min)) * (to.max - to.min) + to.min
   );
 }
+
+/**
+ * Checks if the given value is a power of 2.
+ */
+export function isPowerOf2(value: number): boolean {
+  return (value & (value - 1)) === 0;
+}

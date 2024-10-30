@@ -12,10 +12,10 @@ export class AnimationSystem implements System {
     const result = entities.queryAllEntities(query);
 
     for (const { animated, drawable } of result) {
-      animated.animation.tick(dt);
+      animated.tick(dt);
 
       if (drawable) {
-        drawable.content = animated.animation.getFrame();
+        drawable.content = animated.getImage();
       }
     }
   }

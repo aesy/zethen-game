@@ -1,5 +1,5 @@
-import { Point2 } from "@/engine/math/point";
-import { Dimension2 } from "@/engine/math/dimension";
+import { Pnt2 } from "@/engine/math/pnt2";
+import { Dim2 } from "@/engine/math/dim2";
 import { Component, ComponentId } from "@/engine/component";
 
 export class Drawable implements Component {
@@ -11,7 +11,7 @@ export class Drawable implements Component {
 
   constructor(
     public content: CanvasImageSource,
-    public position: Point2,
-    public size: Dimension2,
+    public position: Pnt2,
+    public size: Dim2,
   ) {}
 }
