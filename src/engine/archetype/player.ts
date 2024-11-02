@@ -1,3 +1,4 @@
+import { ZIndex } from "@/engine/component/zindex";
 import { Transform2D } from "@/engine/component/transform2D";
 import { Drawable } from "@/engine/component/drawable";
 import { Controlled } from "@/engine/component/controlled";
@@ -13,4 +14,5 @@ export const Player = Archetype.builder()
   .single("collidable", Collidable)
   .single("drawable", Drawable)
   .single("animated", Animated)
+  .optional("zIndex", ZIndex)
   .build();

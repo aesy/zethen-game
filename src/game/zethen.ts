@@ -1,3 +1,4 @@
+import { TileMapSystem } from "@/engine/system/tilemap";
 import { PlayerControlSystem } from "@/engine/system/player";
 import { CollisionSystem } from "@/engine/system/collision";
 import { AnimationSystem } from "@/engine/system/animation";
@@ -9,6 +10,7 @@ import {
   VelocityDebugRenderer,
 } from "@/engine/renderer/debug";
 import { Game } from "@/engine/game";
+import { createTileMap } from "@/engine/entity/tilemap";
 import { createPlayer } from "@/engine/entity/player";
 import { createBox } from "@/engine/entity/box";
 import { createBall } from "@/engine/entity/ball";
@@ -30,7 +32,7 @@ function onVisibilityChange(game: Game): void {
   }
 }
 
-export function createGame(): Game {
+export async function createGame(): Promise<Game> {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
 
   if (!canvas) {
@@ -48,23 +50,26 @@ export function createGame(): Game {
     throw new Error("2D canvas is not supported :-(");
   }
 
+  const [tileMap, tileSet] = await createTileMap();
+
   const game = new Game();
   const {
     scene: { systems, entities },
   } = game;
+  systems.add(new TileMapSystem(context, tileMap, tileSet));
   systems.add(new PlayerControlSystem());
   // systems.add(new GravitySystem());
   // systems.add(new MoveSystem());
   systems.add(new AnimationSystem());
   systems.add(new CollisionSystem());
-  systems.add(new ShapeRenderer(context));
   systems.add(new ImageRenderer(context));
+  systems.add(new ShapeRenderer(context));
   systems.add(new ColliderDebugRenderer(context));
   systems.add(new CollisionDebugRenderer(context));
   systems.add(new VelocityDebugRenderer(context, 0.2));
   // systems.add(new WebGLRenderer(context));
 
-  void createPlayer(entities);
+  await createPlayer(entities);
 
   for (let i = 0; i < 10; i++) {
     createBall(entities);

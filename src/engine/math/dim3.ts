@@ -11,7 +11,7 @@ export type ReadonlyDim3 = Readonly<Dim3Like> & {
   toString(): string;
 };
 
-export class Dim3 implements ReadonlyDim3 {
+export class Dim3 implements Dim3Like, ReadonlyDim3 {
   constructor(
     public width: number,
     public height: number,

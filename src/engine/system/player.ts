@@ -66,10 +66,8 @@ export class PlayerControlSystem implements System {
     } else {
       if (inputs.isKeyPressed(SHIFT)) {
         dir.multiplyScalar(2);
-        animated.speedModifier = 2;
         character.movementState = MovementState.RUNNING;
       } else {
-        animated.speedModifier = 1;
         character.movementState = MovementState.WALKING;
       }
 

@@ -21,12 +21,7 @@ export type ReadonlyRect = Readonly<RectLike> & {
   bottomLeft: ReadonlyPnt2;
   bottomRight: ReadonlyPnt2;
   corners: [ReadonlyPnt2, ReadonlyPnt2, ReadonlyPnt2, ReadonlyPnt2];
-  edges: [
-    Readonly<ReadonlyLine2>,
-    Readonly<ReadonlyLine2>,
-    Readonly<ReadonlyLine2>,
-    Readonly<ReadonlyLine2>,
-  ];
+  edges: [ReadonlyLine2, ReadonlyLine2, ReadonlyLine2, ReadonlyLine2];
   getClosestPoint(point: Readonly<Pnt2Like>): Pnt2;
   containsPoint(point: Readonly<Pnt2Like>): boolean;
   containsRect(rect: Readonly<RectLike>): boolean;
@@ -94,10 +89,10 @@ export class Rect implements RectLike, ReadonlyRect {
   }
 
   public get edges(): [
-    Readonly<Line2>,
-    Readonly<Line2>,
-    Readonly<Line2>,
-    Readonly<Line2>,
+    ReadonlyLine2,
+    ReadonlyLine2,
+    ReadonlyLine2,
+    ReadonlyLine2,
   ] {
     return Rect.getEdges(this);
   }
@@ -106,7 +101,7 @@ export class Rect implements RectLike, ReadonlyRect {
     return new Rect(rect.x, rect.y, rect.width, rect.height);
   }
 
-  public static getCenter(rect: Readonly<RectLike>): Pnt2 {
+  public static getCenter(rect: Readonly<RectLike>): ReadonlyPnt2 {
     return new Pnt2(rect.x + rect.width / 2, rect.y + rect.height / 2);
   }
 

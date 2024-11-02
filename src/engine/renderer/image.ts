@@ -1,13 +1,35 @@
 import { System } from "@/engine/system";
 import { Scene } from "@/engine/game/scene";
+import { EntityOf } from "@/engine/entity";
 import { Renderable } from "@/engine/archetype/renderable";
+
+function sortRenderable(
+  a: EntityOf<typeof Renderable>,
+  b: EntityOf<typeof Renderable>,
+): number {
+  if (a.zIndex && b.zIndex) {
+    return a.zIndex.value - b.zIndex.value;
+  }
+
+  if (a.zIndex) {
+    return 1;
+  }
+
+  if (b.zIndex) {
+    return -1;
+  }
+
+  return 0;
+}
 
 export class ImageRenderer implements System {
   constructor(private readonly context: CanvasRenderingContext2D) {}
 
   public update({ entities }: Scene, _dt: number): void {
     const ctx = this.context;
-    const renderables = entities.queryAllEntities(Renderable);
+    const renderables = entities
+      .queryAllEntities(Renderable)
+      .toSorted(sortRenderable);
 
     for (const renderable of renderables) {
       const { transform, drawable } = renderable;

@@ -4,6 +4,7 @@ import { Pnt2 } from "@/engine/math/pnt2";
 import { Circle } from "@/engine/math/circle";
 import { EntityManager } from "@/engine/entity/manager";
 import { EntityId } from "@/engine/entity";
+import { ZIndex } from "@/engine/component/zindex";
 import { Transform2D } from "@/engine/component/transform2D";
 import { Physical } from "@/engine/component/physical";
 import { Collidable } from "@/engine/component/collidable";
@@ -22,11 +23,13 @@ export function createBall(entities: EntityManager): EntityId {
   const circle = new CircleComponent(radius, new Rgba(125, 200, 0, 1));
   const physical = new Physical(10, velocity);
   const collidable = new Collidable(new Circle(0, 0, radius));
+  const zIndex = new ZIndex(1);
 
   return entities.createArchetype(Ball, {
     transform,
     circle,
     physical,
     collidable,
+    zIndex,
   });
 }

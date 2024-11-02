@@ -1,5 +1,7 @@
+import { Arrays } from "@/engine/util/arrays";
 import { RectLike } from "@/engine/math/rect";
 import { Pnt2, Pnt2Like } from "@/engine/math/pnt2";
+import { Dim2Like } from "@/engine/math/dim2";
 
 export namespace SpriteSheet {
   export async function fromPredefined(
@@ -21,20 +23,28 @@ export namespace SpriteSheet {
       | HTMLImageElement
       | HTMLCanvasElement
       | OffscreenCanvas,
-    gridSize: Readonly<RectLike>,
-    gridOffset: Readonly<Pnt2Like> = Pnt2.ORIGIN,
-  ): Promise<ImageBitmap[]> {
+    settings: {
+      gridSize: Readonly<Dim2Like>;
+      gridOffset?: Readonly<Pnt2Like>;
+      gridSpacing?: Readonly<Pnt2Like>;
+    },
+  ): Promise<ImageBitmap[][]> {
     const { width: imageWidth, height: imageHeight } = image;
-    const { x: offsetX, y: offsetY } = gridOffset;
-    const { width: spriteWidth, height: spriteHeight } = gridSize;
-    const cols = Math.floor((imageWidth - offsetX) / spriteWidth);
-    const rows = Math.floor((imageHeight - offsetY) / spriteHeight);
+    const { x: offsetX, y: offsetY } = settings.gridOffset ?? Pnt2.ORIGIN;
+    const { width: spriteWidth, height: spriteHeight } = settings.gridSize;
+    const { x: spacingX, y: spacingY } = settings.gridSpacing ?? Pnt2.ORIGIN;
+    const cols = Math.floor(
+      (imageWidth - offsetX + spacingX) / (spriteWidth + spacingX),
+    );
+    const rows = Math.floor(
+      (imageHeight - offsetY + spacingY) / (spriteHeight + spacingY),
+    );
     const promises: Promise<ImageBitmap>[] = [];
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        const x = offsetX + col * spriteWidth;
-        const y = offsetY + row * spriteHeight;
+        const x = offsetX + col * (spriteWidth + spacingX);
+        const y = offsetY + row * (spriteHeight + spacingY);
 
         promises.push(
           createImageBitmap(image, x, y, spriteWidth, spriteHeight),
@@ -42,6 +52,8 @@ export namespace SpriteSheet {
       }
     }
 
-    return await Promise.all(promises);
+    const sprites = await Promise.all(promises);
+
+    return Arrays.chunk(sprites, rows);
   }
 }

@@ -10,16 +10,8 @@ export class ShapeRenderer implements System {
   constructor(private readonly context: CanvasRenderingContext2D) {}
 
   public update({ entities }: Scene, _dt: number): void {
-    this.clear();
     this.renderBoxes(entities);
     this.renderBalls(entities);
-  }
-
-  private clear(): void {
-    const ctx = this.context;
-    const canvas = ctx.canvas;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   private renderBoxes(entities: EntityManager): void {

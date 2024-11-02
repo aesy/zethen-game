@@ -1,16 +1,18 @@
 import { loadImage } from "@/engine/util/image";
+import { Rgba } from "@/engine/math/rgba";
 import { Rect } from "@/engine/math/rect";
 import { Pnt2 } from "@/engine/math/pnt2";
 import { Dim2 } from "@/engine/math/dim2";
-import { Circle } from "@/engine/math/circle";
 import { SpriteSheet } from "@/engine/image/spritesheet";
 import playerImg from "@/engine/experimental/cat-tilesheet.png";
 import { EntityManager } from "@/engine/entity/manager";
 import { EntityId } from "@/engine/entity";
+import { ZIndex } from "@/engine/component/zindex";
 import { Transform2D } from "@/engine/component/transform2D";
 import { Drawable } from "@/engine/component/drawable";
 import { Controlled } from "@/engine/component/controlled";
 import { Collidable } from "@/engine/component/collidable";
+import { Circle } from "@/engine/component/circle";
 import {
   Character,
   FacingDirection,
@@ -81,19 +83,17 @@ export async function createPlayer(entities: EntityManager): Promise<EntityId> {
       FacingDirection.EAST,
     ),
     controlled: new Controlled(),
-    collidable: new Collidable(
-      new Circle(0, 0, 40),
-      // new Rect(-30, -30, 60, 60),
-    ),
+    collidable: new Collidable(new Rect(-30, -30, 60, 60)),
     drawable: new Drawable(idleSpritesheet[0], Pnt2.zero(), new Dim2(64, 64)),
     animated: new Animated(
       {
         [CharacterAnimation.IDLE]: new FrameAnimation(idleSpritesheet, 0.15),
-        [CharacterAnimation.WALKING]: new FrameAnimation(walkSpritesheet, 0.15),
-        [CharacterAnimation.RUNNING]: new FrameAnimation(runSpritesheet, 0.15),
-        [CharacterAnimation.JUMPING]: new FrameAnimation(jumpSpritesheet, 0.15),
+        [CharacterAnimation.WALKING]: new FrameAnimation(walkSpritesheet, 0.1),
+        [CharacterAnimation.RUNNING]: new FrameAnimation(runSpritesheet, 0.07),
+        [CharacterAnimation.JUMPING]: new FrameAnimation(jumpSpritesheet, 0.1),
       },
       CharacterAnimation.WALKING,
     ),
+    zIndex: new ZIndex(3),
   });
 }

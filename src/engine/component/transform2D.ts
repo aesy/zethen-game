@@ -6,7 +6,7 @@ export class Transform2D implements Component {
   public static readonly id: ComponentId = ComponentId.next();
 
   constructor(
-    public readonly position: Pnt2,
+    public readonly position: Pnt2 = new Pnt2(0, 0),
     public rotation: number = 0,
     public readonly scale = new Dim2(1, 1),
   ) {}

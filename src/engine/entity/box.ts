@@ -5,8 +5,9 @@ import { Pnt2 } from "@/engine/math/pnt2";
 import { Dim2 } from "@/engine/math/dim2";
 import { EntityManager } from "@/engine/entity/manager";
 import { EntityId } from "@/engine/entity";
+import { ZIndex } from "@/engine/component/zindex";
 import { Transform2D } from "@/engine/component/transform2D";
-import { Rectangle as Rectangle } from "@/engine/component/rectangle";
+import { Rectangle } from "@/engine/component/rectangle";
 import { Physical } from "@/engine/component/physical";
 import { Collidable } from "@/engine/component/collidable";
 import { Box } from "@/engine/archetype/box";
@@ -23,11 +24,13 @@ export function createBox(entities: EntityManager): EntityId {
   const rectangle = new Rectangle(size, new Rgba(0, 0, 255, 1));
   const physical = new Physical(10, velocity);
   const collidable = new Collidable(new Rect(0, 0, size.width, size.height));
+  const zIndex = new ZIndex(1);
 
   return entities.createArchetype(Box, {
     transform,
     rectangle,
     physical,
     collidable,
+    zIndex,
   });
 }

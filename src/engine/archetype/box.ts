@@ -1,3 +1,4 @@
+import { ZIndex } from "@/engine/component/zindex";
 import { Transform2D } from "@/engine/component/transform2D";
 import { Rectangle } from "@/engine/component/rectangle";
 import { Physical } from "@/engine/component/physical";
@@ -9,4 +10,5 @@ export const Box = Archetype.builder()
   .single("rectangle", Rectangle)
   .optional("physical", Physical)
   .optional("collidable", Collidable)
+  .optional("zIndex", ZIndex)
   .build();
