@@ -2,7 +2,8 @@ import { Vec2 } from "@/engine/math/vec2";
 import { Rect } from "@/engine/math/rect";
 import { Pnt2Like } from "@/engine/math/pnt2";
 import { Circle } from "@/engine/math/circle";
-import { Collider } from "@/engine/component/collidable";
+
+type Collider = Rect | Circle;
 
 export type Collision = {
   position: Pnt2Like;

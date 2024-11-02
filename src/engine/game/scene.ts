@@ -1,8 +1,8 @@
-import { SystemManager } from "@/engine/system/manager";
 import { InputManager } from "@/engine/input/manager";
 import { Bundle } from "@/engine/game/bundle";
-import { EventBus } from "@/engine/event/bus";
-import { EntityManager } from "@/engine/entity/manager";
+import { EventBus } from "@/engine/event/eventbus";
+import { SystemManager } from "@/engine/ecs/systemmanager";
+import { EntityManager } from "@/engine/ecs/entitymanager";
 
 export class Scene {
   public readonly entities: EntityManager = new EntityManager();

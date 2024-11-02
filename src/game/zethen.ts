@@ -1,19 +1,20 @@
-import { TileMapSystem } from "@/engine/system/tilemap";
-import { PlayerControlSystem } from "@/engine/system/player";
-import { CollisionSystem } from "@/engine/system/collision";
-import { AnimationSystem } from "@/engine/system/animation";
-import { ShapeRenderer } from "@/engine/renderer/shape";
-import { ImageRenderer } from "@/engine/renderer/image";
+import { TileMapSystem } from "@/game/system/tilemap";
+import { PlayerControlSystem } from "@/game/system/player";
+import { CollisionSystem } from "@/game/system/collision";
+import { AttachSystem } from "@/game/system/attach";
+import { AnimationSystem } from "@/game/system/animation";
+import { ShapeRenderer } from "@/game/renderer/shape";
+import { ImageRenderer } from "@/game/renderer/image";
 import {
   ColliderDebugRenderer,
   CollisionDebugRenderer,
   VelocityDebugRenderer,
-} from "@/engine/renderer/debug";
-import { Game } from "@/engine/game";
-import { createTileMap } from "@/engine/entity/tilemap";
-import { createPlayer } from "@/engine/entity/player";
-import { createBox } from "@/engine/entity/box";
-import { createBall } from "@/engine/entity/ball";
+} from "@/game/renderer/debug";
+import { createTileMap } from "@/game/entity/tilemap";
+import { createPlayer } from "@/game/entity/player";
+import { createBox } from "@/game/entity/box";
+import { createBall } from "@/game/entity/ball";
+import { Game } from "@/engine/game/game";
 
 function onResize(canvas: HTMLCanvasElement): void {
   const { clientWidth, clientHeight } = canvas;
@@ -62,6 +63,7 @@ export async function createGame(): Promise<Game> {
   // systems.add(new MoveSystem());
   systems.add(new AnimationSystem());
   systems.add(new CollisionSystem());
+  systems.add(new AttachSystem());
   systems.add(new ImageRenderer(context));
   systems.add(new ShapeRenderer(context));
   systems.add(new ColliderDebugRenderer(context));
@@ -71,11 +73,11 @@ export async function createGame(): Promise<Game> {
 
   await createPlayer(entities);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 1; i++) {
     createBall(entities);
   }
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     createBox(entities);
   }
 
