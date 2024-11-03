@@ -38,14 +38,14 @@ export class TileMapSystem implements System {
       const transform = entities.getFirstComponent(tile, Transform2D);
 
       if (drawable && transform) {
-        const outsideViewArea = !viewArea.overlapsRect({
+        const inView = viewArea.overlapsRect({
           x: transform.position.x,
           y: transform.position.y,
           width: GRID_SIZE,
           height: GRID_SIZE,
         });
 
-        if (outsideViewArea) {
+        if (!inView) {
           entities.removeComponent(tile, drawable);
         }
       }
@@ -60,15 +60,14 @@ export class TileMapSystem implements System {
 
           if (image) {
             const position = new Pnt2(x * GRID_SIZE, y * GRID_SIZE);
+            const inView = viewArea.overlapsRect({
+              x: position.x,
+              y: position.y,
+              width: GRID_SIZE,
+              height: GRID_SIZE,
+            });
 
-            if (
-              !viewArea.overlapsRect({
-                x: position.x,
-                y: position.y,
-                width: GRID_SIZE,
-                height: GRID_SIZE,
-              })
-            ) {
+            if (!inView) {
               continue;
             }
 

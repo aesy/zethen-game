@@ -9,8 +9,10 @@ export function createCamera(
   entities: EntityManager,
   target: EntityId,
 ): EntityId {
+  const transform = entities.getFirstComponent(target, Transform2D);
+
   return entities.createArchetype(Camera, {
-    transform: new Transform2D(),
+    transform: new Transform2D(transform?.position?.clone()),
     camera: new CameraComponent(),
     attached: new Attached(target),
   });

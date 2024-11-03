@@ -5,7 +5,7 @@ import { System } from "@/engine/ecs/system";
 import { Query } from "@/engine/ecs/query";
 
 export class AttachSystem implements System {
-  public update({ entities }: Scene, _dt: number): void {
+  public update({ entities }: Scene, dt: number): void {
     const attachedEntities = entities.queryAllEntities(
       Query.create()
         .single("transform", Transform2D)
@@ -19,7 +19,12 @@ export class AttachSystem implements System {
       );
 
       if (targetEntity) {
-        transform.position.copy(targetEntity.position);
+        const diff = targetEntity.position
+          .clone()
+          .subtract(transform.position)
+          .multiplyScalar(5)
+          .multiplyScalar(dt);
+        transform.position.add(diff);
       }
     }
   }
