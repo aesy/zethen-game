@@ -21,7 +21,7 @@ export class FrameAnimation implements Animation {
   private currentTime = 0;
   private currentFrame = 0;
 
-  public constructor(
+  constructor(
     private frames: CanvasImageSource[],
     private frameTimeSeconds = 0,
   ) {

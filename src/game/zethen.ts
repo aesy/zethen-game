@@ -12,8 +12,10 @@ import {
 } from "@/game/renderer/debug";
 import { createTileMap } from "@/game/entity/tilemap";
 import { createPlayer } from "@/game/entity/player";
+import { createCamera } from "@/game/entity/camera";
 import { createBox } from "@/game/entity/box";
 import { createBall } from "@/game/entity/ball";
+import { Scene } from "@/engine/game/scene";
 import { Game } from "@/engine/game/game";
 
 function onResize(canvas: HTMLCanvasElement): void {
@@ -27,7 +29,7 @@ function onVisibilityChange(game: Game): void {
   if (document.hidden) {
     console.warn("Stopping game due to visibility change");
     game.stop();
-  } else {
+  } else if (!game.isRunning) {
     console.info("Starting game after visibility change");
     game.start();
   }
@@ -71,9 +73,10 @@ export async function createGame(): Promise<Game> {
   systems.add(new VelocityDebugRenderer(context, 0.2));
   // systems.add(new WebGLRenderer(context));
 
-  await createPlayer(entities);
+  const player = await createPlayer(entities);
+  createCamera(entities, player);
 
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 20; i++) {
     createBall(entities);
   }
 

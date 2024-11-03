@@ -86,6 +86,17 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
     return first.x * second.x + first.y * second.y + first.z * second.z;
   }
 
+  public static cross(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+  ): Vec3 {
+    return new Vec3(
+      first.y * second.z - first.z * second.y,
+      first.z * second.x - first.x * second.z,
+      first.x * second.y - first.y * second.x,
+    );
+  }
+
   public static normalize(vec: Readonly<Vec3Like>): Vec3 {
     return Vec3.from(vec).normalize();
   }

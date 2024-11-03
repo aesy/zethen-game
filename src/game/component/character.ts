@@ -25,7 +25,7 @@ export enum MovementState {
 export class Character implements Component {
   public static readonly id: ComponentId = ComponentId.next();
 
-  public constructor(
+  constructor(
     public locationState: LocationState,
     public movementState: MovementState,
     public facingDirection: FacingDirection,

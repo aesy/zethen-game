@@ -8,7 +8,7 @@ export class TileMap<T extends string = string> {
 
   private readonly indices: Map<T, number> = new Map();
 
-  public constructor(
+  constructor(
     public readonly width: number,
     public readonly height: number,
     private readonly layers: TileLayer<T>[],

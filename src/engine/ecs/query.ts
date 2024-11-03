@@ -83,6 +83,14 @@ export class Query<T extends EntityDescriptor> implements Queryable<T> {
     return new Query({});
   }
 
+  public static from<T extends EntityDescriptor>(
+    queryable: Queryable<T>,
+  ): Query<T> {
+    const descriptor = Object.assign({}, queryable.getDescriptor());
+
+    return new Query(descriptor);
+  }
+
   public static pickFrom<T extends EntityDescriptor, K extends keyof T>(
     queryable: Queryable<T>,
     ...keys: K[]
@@ -114,7 +122,7 @@ export class Query<T extends EntityDescriptor> implements Queryable<T> {
     name: S,
     type: ComponentConstructor<C>,
   ): Query<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.NONE;
@@ -135,7 +143,7 @@ export class Query<T extends EntityDescriptor> implements Queryable<T> {
     name: S,
     type: ComponentConstructor<C>,
   ): Query<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.SINGLE;
@@ -156,7 +164,7 @@ export class Query<T extends EntityDescriptor> implements Queryable<T> {
     name: S,
     type: ComponentConstructor<C>,
   ): Query<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.VARYING;
@@ -177,7 +185,7 @@ export class Query<T extends EntityDescriptor> implements Queryable<T> {
     name: S,
     type: ComponentConstructor<C>,
   ): Query<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.OPTIONAL;

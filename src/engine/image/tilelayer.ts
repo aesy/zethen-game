@@ -2,7 +2,7 @@ import { Pnt2Like } from "@/engine/math/pnt2";
 import { Tile } from "@/engine/image/tile";
 
 export class TileLayer<T extends string = string> {
-  public constructor(
+  constructor(
     public readonly name: T,
     private readonly tiles: (Tile | null)[][],
   ) {}

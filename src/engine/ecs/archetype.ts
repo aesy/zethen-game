@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+
 import { Queryable, QueryId } from "@/engine/ecs/query";
 import { EntityDescriptor } from "@/engine/ecs/entity";
 import {
@@ -13,13 +15,14 @@ class ArchetypeBuilder<T extends EntityDescriptor = EntityDescriptor> {
     name: S,
     type: ComponentConstructor<C>,
   ): ArchetypeBuilder<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.NONE;
       };
     }
   > {
+    // @ts-ignore
     return new ArchetypeBuilder({
       ...this.descriptor,
       [name]: { type, constraint: Constraint.NONE },
@@ -30,13 +33,14 @@ class ArchetypeBuilder<T extends EntityDescriptor = EntityDescriptor> {
     name: S,
     type: ComponentConstructor<C>,
   ): ArchetypeBuilder<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.SINGLE;
       };
     }
   > {
+    // @ts-ignore
     return new ArchetypeBuilder({
       ...this.descriptor,
       [name]: { type, constraint: Constraint.SINGLE },
@@ -47,13 +51,14 @@ class ArchetypeBuilder<T extends EntityDescriptor = EntityDescriptor> {
     name: S,
     type: ComponentConstructor<C>,
   ): ArchetypeBuilder<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.VARYING;
       };
     }
   > {
+    // @ts-ignore
     return new ArchetypeBuilder({
       ...this.descriptor,
       [name]: { type, constraint: Constraint.VARYING },
@@ -64,13 +69,14 @@ class ArchetypeBuilder<T extends EntityDescriptor = EntityDescriptor> {
     name: S,
     type: ComponentConstructor<C>,
   ): ArchetypeBuilder<
-    T & {
+    Omit<T, S> & {
       [key in S]: {
         type: ComponentConstructor<C>;
         constraint: Constraint.OPTIONAL;
       };
     }
   > {
+    // @ts-ignore
     return new ArchetypeBuilder({
       ...this.descriptor,
       [name]: { type, constraint: Constraint.OPTIONAL },

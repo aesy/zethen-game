@@ -1,6 +1,7 @@
 import { Transform2D } from "@/game/component/transform2D";
+import { Physical } from "@/game/component/physical";
 import { Collidable } from "@/game/component/collidable";
-import { Movable } from "@/game/archetype/movable";
+import { Camera } from "@/game/archetype/camera";
 import { Rgba } from "@/engine/math/rgba";
 import { Rect, RectLike } from "@/engine/math/rect";
 import { Pnt2Like } from "@/engine/math/pnt2";
@@ -19,16 +20,27 @@ export class VelocityDebugRenderer implements System {
 
   public update({ entities }: Scene, _dt: number): void {
     const ctx = this.context;
-    const movables = entities
-      .queryAllEntities(Movable)
-      .filter((movable) => Boolean(movable.physical));
+    const camera = entities.queryFirstEntity(Camera);
+    const movables = entities.queryAllEntities(
+      Query.create()
+        .single("transform", Transform2D)
+        .single("physical", Physical),
+    );
+
+    ctx.save();
+
+    if (camera) {
+      ctx.translate(
+        -camera.transform.position.x + ctx.canvas.width / 2,
+        -camera.transform.position.y + ctx.canvas.height / 2,
+      );
+    }
 
     for (const movable of movables) {
       const {
         transform: { position },
-        physical,
+        physical: { velocity },
       } = movable;
-      const { velocity } = physical!;
 
       ctx.lineWidth = 3;
       ctx.strokeStyle = "black";
@@ -42,6 +54,8 @@ export class VelocityDebugRenderer implements System {
       );
       ctx.stroke();
     }
+
+    ctx.restore();
   }
 }
 
@@ -52,19 +66,36 @@ export class CollisionDebugRenderer implements System {
   constructor(private readonly context: CanvasRenderingContext2D) {}
 
   public update({ entities }: Scene, _dt: number): void {
-    const movables = entities
-      .queryAllEntities(Movable)
-      .filter((movable) => Boolean(movable.collidable));
+    const ctx = this.context;
+    const camera = entities.queryFirstEntity(Camera);
+    const movables = entities.queryAllEntities(
+      Query.create()
+        .single("transform", Transform2D)
+        .single("collidable", Collidable),
+    );
+
+    ctx.save();
+
+    if (camera) {
+      ctx.translate(
+        -camera.transform.position.x + ctx.canvas.width / 2,
+        -camera.transform.position.y + ctx.canvas.height / 2,
+      );
+    }
 
     for (let i = 0; i < movables.length; i++) {
       const movable1 = movables[i];
-      const { transform: transform1, collidable: collidable1 } = movable1;
-      const { collider: collider1 } = collidable1!;
+      const {
+        transform: transform1,
+        collidable: { collider: collider1 },
+      } = movable1;
 
       for (let j = i + 1; j < movables.length; j++) {
         const movable2 = movables[j];
-        const { transform: transform2, collidable: collidable2 } = movable2;
-        const { collider: collider2 } = collidable2!;
+        const {
+          transform: transform2,
+          collidable: { collider: collider2 },
+        } = movable2;
 
         if (collider1 instanceof Circle && collider2 instanceof Circle) {
           const circle1 = Circle.from({
@@ -161,6 +192,8 @@ export class CollisionDebugRenderer implements System {
         }
       }
     }
+
+    ctx.restore();
   }
 
   private handleCircleCircleCollision(): void {}
@@ -197,17 +230,27 @@ export class ColliderDebugRenderer implements System {
 
   public update({ entities }: Scene, _dt: number): void {
     const ctx = this.context;
-    const movables = entities
-      .queryAllEntities(
-        Query.create()
-          .single("transform", Transform2D)
-          .single("collidable", Collidable),
-      )
-      .filter((movable) => Boolean(movable.collidable));
+    const camera = entities.queryFirstEntity(Camera);
+    const movables = entities.queryAllEntities(
+      Query.create()
+        .single("transform", Transform2D)
+        .single("collidable", Collidable),
+    );
+
+    ctx.save();
+
+    if (camera) {
+      ctx.translate(
+        -camera.transform.position.x + ctx.canvas.width / 2,
+        -camera.transform.position.y + ctx.canvas.height / 2,
+      );
+    }
 
     for (const movable of movables) {
-      const { transform, collidable } = movable;
-      const { collider } = collidable!;
+      const {
+        transform,
+        collidable: { collider },
+      } = movable;
 
       if (collider instanceof Circle) {
         const circle = Circle.from({
@@ -238,5 +281,7 @@ export class ColliderDebugRenderer implements System {
         ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
       }
     }
+
+    ctx.restore();
   }
 }

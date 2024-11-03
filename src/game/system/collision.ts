@@ -1,24 +1,32 @@
-import { Movable } from "@/game/archetype/movable";
+import { Transform2D } from "@/game/component/transform2D";
+import { Collidable } from "@/game/component/collidable";
 import { Rect } from "@/engine/math/rect";
 import { Circle } from "@/engine/math/circle";
 import { Scene } from "@/engine/game/scene";
 import { System } from "@/engine/ecs/system";
+import { Query } from "@/engine/ecs/query";
 
 export class CollisionSystem implements System {
   public update({ entities }: Scene, _dt: number): void {
-    const movables = entities
-      .queryAllEntities(Movable)
-      .filter((movable) => Boolean(movable.collidable));
+    const movables = entities.queryAllEntities(
+      Query.create()
+        .single("transform", Transform2D)
+        .single("collidable", Collidable),
+    );
 
     for (let i = 0; i < movables.length; i++) {
       const movable1 = movables[i];
-      const { transform: transform1, collidable: collidable1 } = movable1;
-      const { collider: collider1 } = collidable1!;
+      const {
+        transform: transform1,
+        collidable: { collider: collider1 },
+      } = movable1;
 
       for (let j = i + 1; j < movables.length; j++) {
         const movable2 = movables[j];
-        const { transform: transform2, collidable: collidable2 } = movable2;
-        const { collider: collider2 } = collidable2!;
+        const {
+          transform: transform2,
+          collidable: { collider: collider2 },
+        } = movable2;
 
         if (collider1 instanceof Circle && collider2 instanceof Circle) {
           const circle1 = Circle.from({
