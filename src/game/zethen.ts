@@ -2,6 +2,8 @@ import { TileMapSystem } from "@/game/system/tilemap";
 import { PlayerControlSystem } from "@/game/system/player";
 import { MoveSystem } from "@/game/system/move";
 import { LifetimeSystem } from "@/game/system/lifetime";
+import { GuiSystem } from "@/game/system/gui";
+import { DamageSystem } from "@/game/system/damage";
 import { CollisionSystem } from "@/game/system/collision";
 import { AttachSystem } from "@/game/system/attach";
 import { AnimationSystem } from "@/game/system/animation";
@@ -75,8 +77,8 @@ export async function createGame(): Promise<Game> {
   systems.add(new MoveSystem());
   systems.add(new AttachSystem());
   systems.add(new CollisionSystem());
-  // systems.add(new DamageSystem());
-  // systems.add(new LifetimeSystem());
+  systems.add(new DamageSystem());
+  systems.add(new LifetimeSystem());
   systems.add(new AnimationSystem());
   systems.add(new TileMapSystem(context, tileMap, tileSet));
   systems.add(new ImageRenderer(context));
@@ -85,6 +87,7 @@ export async function createGame(): Promise<Game> {
   systems.add(new CollisionDebugRenderer(context));
   systems.add(new VelocityDebugRenderer(context, 0.5));
   systems.add(new CameraDebugRenderer(context));
+  systems.add(new GuiSystem(context));
   // systems.add(new WebGLRenderer(context));
 
   const player = await createPlayer(entities);

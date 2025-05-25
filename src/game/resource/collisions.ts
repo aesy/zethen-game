@@ -1,4 +1,4 @@
-import { SparseArray } from "@/engine/util/sparearray";
+import { SparseArray } from "@/engine/util/sparsearray";
 import { EntityId } from "@/engine/ecs/entity";
 
 export type Collision = {

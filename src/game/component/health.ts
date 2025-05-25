@@ -4,7 +4,7 @@ export class Health implements Component {
   public static readonly id: ComponentId = ComponentId.next();
 
   constructor(
-    public readonly hpTotal: number,
-    public readonly hpLeft: number = hpTotal,
+    public hpTotal: number,
+    public hpLeft: number = hpTotal,
   ) {}
 }
