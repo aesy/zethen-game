@@ -76,7 +76,7 @@ export async function createPlayer(entities: EntityManager): Promise<EntityId> {
   ]);
 
   const player = entities.createArchetype(Player, {
-    transform: new Transform2D(new Pnt2(0, 0)),
+    transform: new Transform2D(new Pnt2(1000, 1000)),
     character: new Character(
       LocationState.GROUNDED,
       MovementState.IDLE,

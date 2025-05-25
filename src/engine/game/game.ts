@@ -67,7 +67,7 @@ export class Game {
       system.update(this._scene, dt);
     }
 
-    if (Math.random() > 0.9) {
+    if (Math.random() > 0.95) {
       // console.log("fps", Math.round(this.fpsCounter.currentFps * 10) / 10);
     }
 

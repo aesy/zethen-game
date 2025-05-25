@@ -69,7 +69,7 @@ export async function createGame(): Promise<Game> {
       context.clearRect(0, 0, canvas.width, canvas.height);
     },
   });
-  systems.add(new PlayerControlSystem());
+  systems.add(new PlayerControlSystem(context));
   // systems.add(new GravitySystem());
   systems.add(new MoveSystem());
   systems.add(new AttachSystem());
@@ -87,11 +87,11 @@ export async function createGame(): Promise<Game> {
   const player = await createPlayer(entities);
   createCamera(entities, player);
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 100; i++) {
     createBall(entities);
   }
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 100; i++) {
     createBox(entities);
   }
 

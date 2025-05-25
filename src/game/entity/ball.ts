@@ -13,7 +13,7 @@ import { EntityId } from "@/engine/ecs/entity";
 
 export function createBall(entities: EntityManager): EntityId {
   const transform = new Transform2D(
-    new Pnt2(Math.random() * 1600, Math.random() * 800),
+    new Pnt2(Math.random() * 2000, Math.random() * 2000),
   );
   const velocity = new Vec2(
     (Math.random() * 1000 - 500) * 0.2,
