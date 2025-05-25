@@ -1,37 +1,59 @@
 import { Vec2 } from "@/engine/math/vec2";
 import { Rect } from "@/engine/math/rect";
-import { Pnt2Like } from "@/engine/math/pnt2";
+import { Pnt2 } from "@/engine/math/pnt2";
 import { Circle } from "@/engine/math/circle";
 
-type Collider = Rect | Circle;
+export type Shape = Rect | Circle;
+
+export type PhysicsBody2 = {
+  position: Pnt2;
+  velocity: Vec2;
+  shape: Shape;
+  restitution?: number;
+  mass?: number;
+  static?: boolean;
+  lock?: {
+    positionX?: boolean;
+    positionY?: boolean;
+    rotationX?: boolean;
+    rotationY?: boolean;
+  };
+};
 
 export type Collision = {
-  position: Pnt2Like;
-  normal: Vec2;
-  direction: Vec2;
+  penetration: Vec2; // "Normal"
+  collisionPoint: Vec2[];
+  bodies: [PhysicsBody2, PhysicsBody2];
 };
+
+/**
+ * TODO
+ * - Check penetration and intersection points
+ * - Separate by reversing position based on relative velocity
+ * - Bounce based on penetration vector mass and restitution
+ */
 
 // function getOverlap(circle1: Circle, circle2: Circle): Rect | null {
 //   if (!isOverlapping(circle1, circle2)) {
 //     return null;
 //   }
 //
-//   const position = Vector2.fromPoint(circle1.center)
+//   const position = Vector2.fromPoint(circle1)
 //     .subtractScalar(circle1.radius)
-//     .subtract(Vector2.fromPoint(circle2.center).subtractScalar(circle2.radius))
+//     .subtract(Vector2.fromPoint(circle2).subtractScalar(circle2.radius))
 //     .abs();
 //   const overlap =
 //     circle1.radius +
 //     circle2.radius -
-//     Points.distance(circle1.center, circle2.center);
+//     Points.distance(circle1, circle2);
 //
 //   return { position, size };
 // }
-
-function getCollisionDirection(circle1: Circle, circle2: Circle): Vec2 {
-  return Vec2.from(circle2.center).subtract(circle1.center).normalize();
-}
-
+//
+// function getCollisionDirection(circle1: Circle, circle2: Circle): Vec2 {
+//   return Vec2.from(circle2).subtract(circle1).normalize();
+// }
+//
 // function getCollisionVelocity(circle1: Circle, circle2: Circle): number {
 //   const collisionDirection = getCollisionDirection(circle1, circle2);
 //
@@ -39,22 +61,26 @@ function getCollisionDirection(circle1: Circle, circle2: Circle): Vec2 {
 //     .subtract(circle2.velocity)
 //     .dot(collisionDirection);
 // }
+//
+// export function resolveCollision(collision: Collision): void {
+//   const [a, b] = collision.bodies;
+//   const elasticity = Math.min(a.restitution, b.restitution);
+//
+//   const relVelocity = a.velocity - b.velocity;
+//   const impulseMagnitude =
+//     (-(1 + elasticity) * dot(relVelocity, collision.penetration)) /
+//     (a.invMass + b.invMass);
+//   const impulseDirection = collision.penetration;
+//   const impulse = impulseDirection * impulseMagnitude; // mul, not dot
+//
+//   a.applyImpulse(impulse);
+//   b.applyImpulse(-impulse);
+// }
 
 export namespace Collision {
-  export function get(
-    collider1: Collider,
-    collider2: Collider,
-  ): Collision | null {
+  export function get(collider1: Shape, collider2: Shape): Collision | null {
     if (collider1 instanceof Circle && collider2 instanceof Circle) {
-      const direction = getCollisionDirection(collider1, collider2);
-
-      return {
-        position: Vec2.from(collider2.center).subtract(
-          Vec2.from(collider1.center).multiplyScalar(0.5),
-        ),
-        direction,
-        normal: null!,
-      };
+      // TODO
     } else if (collider1 instanceof Rect && collider2 instanceof Rect) {
       // throw new Error("Not implemented");
     } else if (collider1 instanceof Circle && collider2 instanceof Rect) {
