@@ -1,4 +1,3 @@
-import playerImg from "@/game/experimental/cat-tilesheet.png";
 import { ZIndex } from "@/game/component/zindex";
 import { Transform2D } from "@/game/component/transform2D";
 import { Health } from "@/game/component/health";
@@ -25,9 +24,10 @@ import { Dim2 } from "@/engine/math/dim2";
 import { SpriteSheet } from "@/engine/image/spritesheet";
 import { EntityManager } from "@/engine/ecs/entitymanager";
 import { EntityId } from "@/engine/ecs/entity";
+import catImg from "@/assets/sprites/cat.png";
 
 export async function createPlayer(entities: EntityManager): Promise<EntityId> {
-  const image = await loadImage(playerImg);
+  const image = await loadImage(catImg);
   const idleSpritesheet = await SpriteSheet.fromPredefined(image, [
     new Rect(7, 18, 16, 16),
     new Rect(39, 18, 16, 16),

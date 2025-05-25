@@ -1,6 +1,7 @@
 import { TileMapSystem } from "@/game/system/tilemap";
 import { PlayerControlSystem } from "@/game/system/player";
 import { MoveSystem } from "@/game/system/move";
+import { LifetimeSystem } from "@/game/system/lifetime";
 import { CollisionSystem } from "@/game/system/collision";
 import { AttachSystem } from "@/game/system/attach";
 import { AnimationSystem } from "@/game/system/animation";
@@ -74,6 +75,8 @@ export async function createGame(): Promise<Game> {
   systems.add(new MoveSystem());
   systems.add(new AttachSystem());
   systems.add(new CollisionSystem());
+  // systems.add(new DamageSystem());
+  // systems.add(new LifetimeSystem());
   systems.add(new AnimationSystem());
   systems.add(new TileMapSystem(context, tileMap, tileSet));
   systems.add(new ImageRenderer(context));

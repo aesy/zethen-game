@@ -1,4 +1,3 @@
-import grassImg from "@/game/experimental/TX Tileset Grass.png";
 import { loadImage } from "@/engine/util/image";
 import { Arrays } from "@/engine/util/arrays";
 import { TileSet } from "@/engine/image/tileset";
@@ -6,9 +5,10 @@ import { TileMap } from "@/engine/image/tilemap";
 import { TileLayer } from "@/engine/image/tilelayer";
 import { Tile } from "@/engine/image/tile";
 import { SpriteSheet } from "@/engine/image/spritesheet";
+import tileMapImage from "@/assets/sprites/tilemap.png";
 
 export async function createTileMap(): Promise<[TileMap, TileSet]> {
-  const image = await loadImage(grassImg);
+  const image = await loadImage(tileMapImage);
   const grassSpritesheet = await SpriteSheet.fromFixedGrid(image, {
     gridSize: { width: 32, height: 32 },
   });
