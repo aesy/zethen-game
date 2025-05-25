@@ -1,3 +1,5 @@
+export const TAU = Math.PI * 2;
+
 export type Range = {
   min: number;
   max: number;

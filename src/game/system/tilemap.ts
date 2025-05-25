@@ -1,5 +1,6 @@
 import { Transform2D } from "@/game/component/transform2D";
 import { Drawable } from "@/game/component/drawable";
+import { Collidable } from "@/game/component/collidable";
 import { Tile } from "@/game/archetype/tile";
 import { Camera } from "@/game/archetype/camera";
 import { Rect } from "@/engine/math/rect";
@@ -26,27 +27,28 @@ export class TileMapSystem implements System {
     const ctx = this.context;
     const camera = entities.queryFirstEntity(Camera);
 
-    const viewArea = new Rect(
-      camera ? camera.transform.position.x - ctx.canvas.width / 2 : 0,
-      camera ? camera.transform.position.y - ctx.canvas.height / 2 : 0,
-      ctx.canvas.width,
-      ctx.canvas.height,
-    );
-
     for (const tile of this.tiles) {
       const drawable = entities.getFirstComponent(tile, Drawable);
       const transform = entities.getFirstComponent(tile, Transform2D);
 
-      if (drawable && transform) {
-        const inView = viewArea.overlapsRect({
-          x: transform.position.x,
-          y: transform.position.y,
-          width: GRID_SIZE,
-          height: GRID_SIZE,
-        });
+      if (camera && drawable && transform) {
+        const inView = camera.camera.isRectInView(
+          camera.transform,
+          {
+            x: transform.position.x,
+            y: transform.position.y,
+            width: GRID_SIZE,
+            height: GRID_SIZE,
+          },
+          ctx.canvas,
+        );
 
         if (!inView) {
-          entities.removeComponent(tile, drawable);
+          if (entities.getFirstComponent(tile, Collidable)) {
+            entities.removeComponent(tile, drawable);
+          } else {
+            entities.deleteEntity(tile);
+          }
         }
       }
     }
@@ -60,15 +62,22 @@ export class TileMapSystem implements System {
 
           if (image) {
             const position = new Pnt2(x * GRID_SIZE, y * GRID_SIZE);
-            const inView = viewArea.overlapsRect({
-              x: position.x,
-              y: position.y,
-              width: GRID_SIZE,
-              height: GRID_SIZE,
-            });
 
-            if (!inView) {
-              continue;
+            if (camera) {
+              const inView = camera.camera.isRectInView(
+                camera.transform,
+                {
+                  x: position.x,
+                  y: position.y,
+                  width: GRID_SIZE,
+                  height: GRID_SIZE,
+                },
+                ctx.canvas,
+              );
+
+              if (!inView) {
+                continue;
+              }
             }
 
             const entity = this.tiles.find((tile) => {
@@ -90,7 +99,6 @@ export class TileMapSystem implements System {
               Pnt2.zero(),
               new Dim2(GRID_SIZE, GRID_SIZE),
             );
-            drawable.centered = false;
 
             if (entity === undefined) {
               const transform = new Transform2D(position);

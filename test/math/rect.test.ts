@@ -62,28 +62,40 @@ describe("Rect", () => {
 
   describe("#getClosestPoint", () => {
     it("should return the closest point on the rect edge when given a point outside the rect", () => {
-      expect(rect.getClosestPoint({ x: 2, y: 4 })).toEqual(new Pnt2(3, 5));
-      expect(rect.getClosestPoint({ x: 4, y: 4 })).toEqual(new Pnt2(4, 5));
-      expect(rect.getClosestPoint({ x: 14, y: 6 })).toEqual(new Pnt2(13, 6));
-      expect(rect.getClosestPoint({ x: 8, y: 20 })).toEqual(new Pnt2(8, 17));
+      expect(Rect.getClosestPoint(rect, { x: 2, y: 4 })).toEqual(
+        new Pnt2(3, 5),
+      );
+      expect(Rect.getClosestPoint(rect, { x: 4, y: 4 })).toEqual(
+        new Pnt2(4, 5),
+      );
+      expect(Rect.getClosestPoint(rect, { x: 14, y: 6 })).toEqual(
+        new Pnt2(13, 6),
+      );
+      expect(Rect.getClosestPoint(rect, { x: 8, y: 20 })).toEqual(
+        new Pnt2(8, 17),
+      );
     });
 
     it("should return the closest point on the rect edge when given a point inside the rect", () => {
-      expect(rect.getClosestPoint({ x: 4, y: 6 })).toEqual(new Pnt2(3, 5));
+      expect(Rect.getClosestPoint(rect, { x: 4, y: 6 })).toEqual(
+        new Pnt2(3, 5),
+      );
       // expect(rect.getClosestPoint({ x: 4, y: 7 })).toEqual(new Pnt2(3, 7));
       // expect(rect.getClosestPoint({ x: 12, y: 15 })).toEqual(new Pnt2(13, 15));
       // expect(rect.getClosestPoint({ x: 10, y: 16 })).toEqual(new Pnt2(10, 17));
     });
 
     it("should return the same point if the given point is at an edge", () => {
-      expect(rect.getClosestPoint({ x: 3, y: 5 })).toEqual(new Pnt2(3, 5));
+      expect(Rect.getClosestPoint(rect, { x: 3, y: 5 })).toEqual(
+        new Pnt2(3, 5),
+      );
       // expect(rect.getClosestPoint({ x: 4, y: 5 })).toEqual(new Pnt2(4, 5));
       // expect(rect.getClosestPoint({ x: 3, y: 6 })).toEqual(new Pnt2(3, 6));
     });
 
     it("should prioritize top-left over bottom-right if multiple edges are equally close", () => {
       expect(
-        new Rect(2, 2, 2, 2).getClosestPoint({
+        Rect.getClosestPoint(new Rect(2, 2, 2, 2), {
           x: 3,
           y: 3,
         }),

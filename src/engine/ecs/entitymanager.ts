@@ -21,6 +21,10 @@ export class EntityManager {
   private entitiesByComponent = new Map<ComponentId, Set<EntityId>>();
   private cachedQueries = new Map<QueryId, Set<EntityId>>();
 
+  public get entityCount(): number {
+    return this.componentsByEntity.size;
+  }
+
   public createEntity(components?: Component[]): EntityId {
     const entityId = EntityId.next();
     this.componentsByEntity.set(entityId, new Map());

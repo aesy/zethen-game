@@ -38,13 +38,13 @@ describe("Circle", () => {
     });
 
     it("should prioritize top edge given center coordinate", () => {
-      expect(circle.getClosestPoint(circle.center)).toEqual({ x: 3, y: 5 });
+      expect(circle.getClosestPoint(circle)).toEqual({ x: 3, y: 5 });
     });
   });
 
   describe("#containsPoint", () => {
     it("should return true if the given point is inside", () => {
-      expect(circle.containsPoint(circle.center)).toEqual(true);
+      expect(circle.containsPoint(circle)).toEqual(true);
       expect(circle.containsPoint({ x: 3, y: 2 })).toEqual(true);
     });
 
@@ -57,9 +57,7 @@ describe("Circle", () => {
   describe("#containsRect", () => {
     it("should return true if the given rect is inside", () => {
       expect(
-        circle.containsRect(
-          Rect.from({ ...circle.center, width: 2, height: 2 }),
-        ),
+        circle.containsRect(Rect.from({ ...circle, width: 2, height: 2 })),
       ).toEqual(true);
     });
 
@@ -69,9 +67,7 @@ describe("Circle", () => {
 
     it("should return false if the given rect is overlapping", () => {
       expect(
-        circle.containsRect(
-          Rect.from({ ...circle.center, width: 2, height: 5 }),
-        ),
+        circle.containsRect(Rect.from({ ...circle, width: 2, height: 5 })),
       ).toEqual(false);
     });
 
@@ -82,9 +78,9 @@ describe("Circle", () => {
 
   describe("#containsCircle", () => {
     it("should return true if the given circle is inside", () => {
-      expect(
-        circle.containsCircle(new Circle(circle.center.x, circle.center.y, 2)),
-      ).toEqual(true);
+      expect(circle.containsCircle(new Circle(circle.x, circle.y, 2))).toEqual(
+        true,
+      );
     });
 
     it("should return false if the given circle is outside", () => {
@@ -98,9 +94,9 @@ describe("Circle", () => {
     });
 
     it("should return false when given circle is surrounding", () => {
-      expect(
-        circle.containsCircle(new Circle(circle.center.x, circle.center.y, 15)),
-      ).toEqual(false);
+      expect(circle.containsCircle(new Circle(circle.x, circle.y, 15))).toEqual(
+        false,
+      );
     });
 
     it("should return true when given itself", () => {
@@ -111,9 +107,7 @@ describe("Circle", () => {
   describe("#overlapsRect", () => {
     it("should return true if the given rect is inside", () => {
       expect(
-        circle.overlapsRect(
-          Rect.from({ ...circle.center, width: 2, height: 2 }),
-        ),
+        circle.overlapsRect(Rect.from({ ...circle, width: 2, height: 2 })),
       ).toEqual(true);
     });
 
@@ -123,9 +117,7 @@ describe("Circle", () => {
 
     it("should return true if the given rect is overlapping", () => {
       expect(
-        circle.overlapsRect(
-          Rect.from({ ...circle.center, width: 2, height: 5 }),
-        ),
+        circle.overlapsRect(Rect.from({ ...circle, width: 2, height: 5 })),
       ).toEqual(true);
     });
 
@@ -136,9 +128,9 @@ describe("Circle", () => {
 
   describe("#overlapsCircle", () => {
     it("should return true if the given circle is inside", () => {
-      expect(
-        circle.overlapsCircle(new Circle(circle.center.x, circle.center.y, 2)),
-      ).toEqual(true);
+      expect(circle.overlapsCircle(new Circle(circle.x, circle.y, 2))).toEqual(
+        true,
+      );
     });
 
     it("should return false if the given circle is outside", () => {
@@ -152,9 +144,9 @@ describe("Circle", () => {
     });
 
     it("should return true when given circle is surrounding", () => {
-      expect(
-        circle.overlapsCircle(new Circle(circle.center.x, circle.center.y, 15)),
-      ).toEqual(true);
+      expect(circle.overlapsCircle(new Circle(circle.x, circle.y, 15))).toEqual(
+        true,
+      );
     });
 
     it("should return true when given itself", () => {

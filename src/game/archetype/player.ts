@@ -1,5 +1,6 @@
 import { ZIndex } from "@/game/component/zindex";
 import { Transform2D } from "@/game/component/transform2D";
+import { Health } from "@/game/component/health";
 import { Drawable } from "@/game/component/drawable";
 import { Controlled } from "@/game/component/controlled";
 import { Collidable } from "@/game/component/collidable";
@@ -14,5 +15,6 @@ export const Player = Archetype.builder()
   .single("collidable", Collidable)
   .single("drawable", Drawable)
   .single("animated", Animated)
+  .single("health", Health)
   .optional("zIndex", ZIndex)
   .build();

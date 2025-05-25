@@ -5,6 +5,7 @@ import {
 } from "@/game/component/character";
 import { CharacterAnimation } from "@/game/component/animated";
 import { Player } from "@/game/archetype/player";
+import { Camera } from "@/game/archetype/camera";
 import { Vec2 } from "@/engine/math/vec2";
 import { Keys } from "@/engine/input/keys";
 import { Scene } from "@/engine/game/scene";
@@ -15,17 +16,13 @@ const VELOCITY = 300;
 export class PlayerControlSystem implements System {
   public update({ entities, inputs }: Scene, dt: number): void {
     const player = entities.queryFirstEntity(Player);
+    const camera = entities.queryFirstEntity(Camera);
 
     if (!player) {
       return;
     }
 
-    const {
-      transform: { position },
-      character,
-      animated,
-      drawable,
-    } = player;
+    const { transform, character, animated, drawable } = player;
     const dir = Vec2.zero();
 
     if (inputs.isKeyPressed(Keys.ARROW_LEFT)) {
@@ -87,7 +84,30 @@ export class PlayerControlSystem implements System {
         break;
     }
 
-    position.x += dir.x * dt;
-    position.y += dir.y * dt;
+    if (inputs.isKeyPressed(Keys.W)) {
+      transform.rescale({ x: 1.1, y: 1.1 });
+    }
+
+    if (inputs.isKeyPressed(Keys.S)) {
+      transform.rescale({ x: 0.9, y: 0.9 });
+    }
+
+    if (inputs.isKeyPressed(Keys.A)) {
+      transform.rotate(-3 * dt);
+    }
+
+    if (inputs.isKeyPressed(Keys.D)) {
+      transform.rotate(3 * dt);
+    }
+
+    if (camera && inputs.isKeyPressed(Keys.Q)) {
+      camera.transform.rotate(-3 * dt);
+    }
+
+    if (camera && inputs.isKeyPressed(Keys.E)) {
+      camera.transform.rotate(3 * dt);
+    }
+
+    transform.translate({ x: dir.x * dt, y: dir.y * dt });
   }
 }

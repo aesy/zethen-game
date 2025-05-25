@@ -67,7 +67,7 @@ export class TileMap<T extends string = string> {
     return tiles;
   }
 
-  *[Symbol.iterator](): Iterator<Tile> {
+  public *[Symbol.iterator](): Iterator<Tile> {
     for (const layer of this.layers) {
       for (const tile of layer) {
         yield tile;

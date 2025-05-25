@@ -1,11 +1,13 @@
 import { TileMapSystem } from "@/game/system/tilemap";
 import { PlayerControlSystem } from "@/game/system/player";
+import { MoveSystem } from "@/game/system/move";
 import { CollisionSystem } from "@/game/system/collision";
 import { AttachSystem } from "@/game/system/attach";
 import { AnimationSystem } from "@/game/system/animation";
 import { ShapeRenderer } from "@/game/renderer/shape";
 import { ImageRenderer } from "@/game/renderer/image";
 import {
+  CameraDebugRenderer,
   ColliderDebugRenderer,
   CollisionDebugRenderer,
   VelocityDebugRenderer,
@@ -18,11 +20,13 @@ import { createBall } from "@/game/entity/ball";
 import { Scene } from "@/engine/game/scene";
 import { Game } from "@/engine/game/game";
 
+const resolutionScaling = window.devicePixelRatio ?? 1.0;
+
 function onResize(canvas: HTMLCanvasElement): void {
   const { clientWidth, clientHeight } = canvas;
 
-  canvas.width = clientWidth;
-  canvas.height = clientHeight;
+  canvas.width = Math.floor(clientWidth * resolutionScaling);
+  canvas.height = Math.floor(clientHeight * resolutionScaling);
 }
 
 function onVisibilityChange(game: Game): void {
@@ -59,28 +63,35 @@ export async function createGame(): Promise<Game> {
   const {
     scene: { systems, entities },
   } = game;
-  systems.add(new TileMapSystem(context, tileMap, tileSet));
+  systems.add({
+    update(_scene: Scene, _dt: number): void {
+      const canvas = context.canvas;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+    },
+  });
   systems.add(new PlayerControlSystem());
   // systems.add(new GravitySystem());
-  // systems.add(new MoveSystem());
-  systems.add(new AnimationSystem());
-  systems.add(new CollisionSystem());
+  systems.add(new MoveSystem());
   systems.add(new AttachSystem());
+  systems.add(new CollisionSystem());
+  systems.add(new AnimationSystem());
+  systems.add(new TileMapSystem(context, tileMap, tileSet));
   systems.add(new ImageRenderer(context));
   systems.add(new ShapeRenderer(context));
   systems.add(new ColliderDebugRenderer(context));
   systems.add(new CollisionDebugRenderer(context));
-  systems.add(new VelocityDebugRenderer(context, 0.2));
+  systems.add(new VelocityDebugRenderer(context, 0.5));
+  systems.add(new CameraDebugRenderer(context));
   // systems.add(new WebGLRenderer(context));
 
   const player = await createPlayer(entities);
   createCamera(entities, player);
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 10; i++) {
     createBall(entities);
   }
 
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 10; i++) {
     createBox(entities);
   }
 

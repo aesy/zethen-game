@@ -1,7 +1,11 @@
-export class Priorityqueue<T> {
+export class PriorityQueue<T> {
   private data: [number, T][] = [];
 
-  public insert(value: T, priority: number = Number.MAX_VALUE): void {
+  public get length(): number {
+    return this.data.length;
+  }
+
+  public push(value: T, priority: number = Number.MAX_VALUE): void {
     if (this.data.length === 0 || priority === Number.MAX_VALUE) {
       this.data.push([priority, value]);
       return;
@@ -40,10 +44,6 @@ export class Priorityqueue<T> {
     return this.data.length === 0;
   }
 
-  public size(): number {
-    return this.data.length;
-  }
-
   public forEach(
     callbackfn: (value: T, index: number, array: this) => void,
     thisArg?: unknown,
@@ -54,7 +54,7 @@ export class Priorityqueue<T> {
     );
   }
 
-  *[Symbol.iterator](): Iterator<T> {
+  public *[Symbol.iterator](): Iterator<T> {
     for (const [_, value] of this.data) {
       yield value;
     }

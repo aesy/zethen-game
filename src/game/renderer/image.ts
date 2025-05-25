@@ -1,6 +1,6 @@
 import { Renderable } from "@/game/archetype/renderable";
 import { Camera } from "@/game/archetype/camera";
-import { Rect } from "@/engine/math/rect";
+import { Canvas } from "@/engine/util/canvas";
 import { Scene } from "@/engine/game/scene";
 import { System } from "@/engine/ecs/system";
 import { EntityOf } from "@/engine/ecs/entity";
@@ -35,62 +35,46 @@ export class ImageRenderer implements System {
       .toSorted(sortRenderable);
 
     ctx.save();
+    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
 
     if (camera) {
-      ctx.translate(
-        -camera.transform.position.x + ctx.canvas.width / 2,
-        -camera.transform.position.y + ctx.canvas.height / 2,
+      const viewMatrix = camera.camera.getViewMatrix(
+        camera.transform,
+        ctx.canvas,
       );
+      Canvas.applyTransform(ctx, viewMatrix.data);
     }
 
     for (const renderable of renderables) {
       const { transform, drawable } = renderable;
-      const { content, size, position, centered, flipX, flipY } = drawable;
+      const { content, size, position, flipX, flipY } = drawable;
+
+      if (
+        camera &&
+        !camera.camera.isRectInView(
+          camera.transform,
+          { ...transform.position, ...size },
+          ctx.canvas,
+        )
+      ) {
+        continue;
+      }
 
       ctx.save();
       ctx.imageSmoothingEnabled = false;
 
-      let x = transform.position.x + position.x;
-      let y = transform.position.y + position.y;
-
-      if (centered) {
-        x -= size.width / 2;
-        y -= size.height / 2;
-      }
-
-      if (camera) {
-        const viewArea = new Rect(
-          camera.transform.position.x - ctx.canvas.width / 2,
-          camera.transform.position.y - ctx.canvas.height / 2,
-          ctx.canvas.width,
-          ctx.canvas.height,
-        );
-
-        if (
-          !viewArea.overlapsRect({
-            x,
-            y,
-            width: size.width,
-            height: size.height,
-          })
-        ) {
-          ctx.restore();
-          continue;
-        }
-      }
+      const modelMatrix = transform.matrix;
+      Canvas.applyTransform(ctx, modelMatrix.data);
 
       if (flipX) {
         ctx.scale(-1, 1);
-        x = -x - size.width;
       }
 
       if (flipY) {
-        ctx.scale(-1, 1);
-        y = -y - size.height;
+        ctx.scale(1, -1);
       }
 
-      // TODO check if in view area, otherwise skip
-      ctx.drawImage(content, x, y, size.width, size.height);
+      ctx.drawImage(content, position.x, position.y, size.width, size.height);
       ctx.restore();
     }
 

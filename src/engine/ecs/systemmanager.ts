@@ -1,9 +1,9 @@
-import { Priorityqueue } from "@/engine/util/priorityqueue";
+import { PriorityQueue } from "@/engine/util/priorityqueue";
 import { Scene } from "@/engine/game/scene";
 import { System } from "@/engine/ecs/system";
 
 export class SystemManager {
-  private readonly systems: Priorityqueue<System> = new Priorityqueue();
+  private readonly systems: PriorityQueue<System> = new PriorityQueue();
 
   constructor(private readonly scene: Scene) {}
 
@@ -11,8 +11,8 @@ export class SystemManager {
     return this.systems;
   }
 
-  public add(system: System): void {
-    this.systems.insert(system);
+  public add(system: System, priority?: number): void {
+    this.systems.push(system, priority);
     system.init?.(this.scene);
   }
 

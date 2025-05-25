@@ -1,7 +1,7 @@
 import { Camera } from "@/game/archetype/camera";
 import { Box } from "@/game/archetype/box";
 import { Ball } from "@/game/archetype/ball";
-import { Rect } from "@/engine/math/rect";
+import { Canvas } from "@/engine/util/canvas";
 import { Scene } from "@/engine/game/scene";
 import { System } from "@/engine/ecs/system";
 import { EntityManager } from "@/engine/ecs/entitymanager";
@@ -16,12 +16,14 @@ export class ShapeRenderer implements System {
     const camera = entities.queryFirstEntity(Camera);
 
     ctx.save();
+    ctx.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
 
     if (camera) {
-      ctx.translate(
-        -camera.transform.position.x + ctx.canvas.width / 2,
-        -camera.transform.position.y + ctx.canvas.height / 2,
+      const viewMatrix = camera.camera.getViewMatrix(
+        camera.transform,
+        ctx.canvas,
       );
+      Canvas.applyTransform(ctx, viewMatrix.data);
     }
 
     this.renderBoxes(entities);
@@ -37,32 +39,29 @@ export class ShapeRenderer implements System {
 
     for (const box of boxes) {
       const {
-        transform: { position },
+        transform,
         rectangle: { size, color },
       } = box;
 
-      if (camera) {
-        const viewArea = new Rect(
-          camera.transform.position.x - ctx.canvas.width / 2,
-          camera.transform.position.y - ctx.canvas.height / 2,
-          ctx.canvas.width,
-          ctx.canvas.height,
-        );
-
-        if (
-          !viewArea.overlapsRect({
-            x: position.x,
-            y: position.y,
-            width: size.width,
-            height: size.height,
-          })
-        ) {
-          continue;
-        }
+      if (
+        camera &&
+        !camera.camera.isRectInView(
+          camera.transform,
+          { ...transform.position, ...size },
+          ctx.canvas,
+        )
+      ) {
+        continue;
       }
 
+      ctx.save();
+
+      const modelMatrix = transform.matrix;
+      Canvas.applyTransform(ctx, modelMatrix.data);
+
       ctx.fillStyle = color.toRgbCssString();
-      ctx.fillRect(position.x, position.y, size.width, size.height);
+      ctx.fillRect(0, 0, size.width, size.height);
+      ctx.restore();
     }
   }
 
@@ -73,34 +72,36 @@ export class ShapeRenderer implements System {
 
     for (const ball of balls) {
       const {
-        transform: { position },
+        transform,
         circle: { radius, color },
       } = ball;
 
-      if (camera) {
-        const viewArea = new Rect(
-          camera.transform.position.x - ctx.canvas.width / 2,
-          camera.transform.position.y - ctx.canvas.height / 2,
-          ctx.canvas.width,
-          ctx.canvas.height,
-        );
-
-        if (
-          !viewArea.overlapsRect({
-            x: position.x - radius,
-            y: position.y - radius,
+      if (
+        camera &&
+        !camera.camera.isRectInView(
+          camera.transform,
+          {
+            x: transform.position.x - radius,
+            y: transform.position.y - radius,
             width: radius * 2,
             height: radius * 2,
-          })
-        ) {
-          continue;
-        }
+          },
+          ctx.canvas,
+        )
+      ) {
+        continue;
       }
+
+      ctx.save();
+
+      const modelMatrix = transform.matrix;
+      Canvas.applyTransform(ctx, modelMatrix.data);
 
       ctx.beginPath();
       ctx.fillStyle = color.toRgbCssString();
-      ctx.arc(position.x, position.y, radius, 0, PI2);
+      ctx.arc(0, 0, radius, 0, PI2);
       ctx.fill();
+      ctx.restore();
     }
   }
 }

@@ -1,7 +1,9 @@
 import { clamp } from "@/engine/util/math";
 import { Pnt2, Pnt2Like, ReadonlyPnt2 } from "@/engine/math/pnt2";
-import { Line2, ReadonlyLine2 } from "@/engine/math/line2";
+import { Line2, Line2Like, ReadonlyLine2 } from "@/engine/math/line2";
 import { Circle, CircleLike } from "@/engine/math/circle";
+
+// TODO translate, rotate, scale, transform
 
 export type RectLike = {
   x: number;
@@ -26,10 +28,16 @@ export type ReadonlyRect = Readonly<RectLike> & {
   containsPoint(point: Readonly<Pnt2Like>): boolean;
   containsRect(rect: Readonly<RectLike>): boolean;
   containsCircle(circle: Readonly<CircleLike>): boolean;
+  containsLine(line: Readonly<Line2Like>): boolean;
   overlapsRect(rect: Readonly<RectLike>): boolean;
   overlapsCircle(circle: Readonly<CircleLike>): boolean;
+  overlapsLine(line: Readonly<Line2Like>): boolean;
   intersectRect(rect: Readonly<RectLike>): Rect | null;
   intersectCircle(circle: Readonly<CircleLike>): Rect | null;
+  getRectIntersectionPoints(rect: Readonly<RectLike>): Pnt2[];
+  getCircleIntersectionPoints(circle: Readonly<CircleLike>): Pnt2[];
+  getLineIntersectionPoints(line: Readonly<Line2Like>): Pnt2[];
+  getBoundingRect(): Rect;
   equals(other: Readonly<RectLike>, epsilon: number): boolean;
   clone(): Rect;
   toString(): string;
@@ -43,7 +51,7 @@ export class Rect implements RectLike, ReadonlyRect {
     public height: number,
   ) {}
 
-  public get center(): ReadonlyPnt2 {
+  public get center(): Pnt2 {
     return Rect.getCenter(this);
   }
 
@@ -63,37 +71,27 @@ export class Rect implements RectLike, ReadonlyRect {
     return Rect.getBottom(this);
   }
 
-  public get topLeft(): ReadonlyPnt2 {
+  public get topLeft(): Pnt2 {
     return Rect.getTopLeft(this);
   }
 
-  public get topRight(): ReadonlyPnt2 {
+  public get topRight(): Pnt2 {
     return Rect.getTopRight(this);
   }
 
-  public get bottomLeft(): ReadonlyPnt2 {
+  public get bottomLeft(): Pnt2 {
     return Rect.getBottomLeft(this);
   }
 
-  public get bottomRight(): ReadonlyPnt2 {
+  public get bottomRight(): Pnt2 {
     return Rect.getBottomRight(this);
   }
 
-  public get corners(): [
-    ReadonlyPnt2,
-    ReadonlyPnt2,
-    ReadonlyPnt2,
-    ReadonlyPnt2,
-  ] {
+  public get corners(): [Pnt2, Pnt2, Pnt2, Pnt2] {
     return Rect.getCorners(this);
   }
 
-  public get edges(): [
-    ReadonlyLine2,
-    ReadonlyLine2,
-    ReadonlyLine2,
-    ReadonlyLine2,
-  ] {
+  public get edges(): [Line2, Line2, Line2, Line2] {
     return Rect.getEdges(this);
   }
 
@@ -101,43 +99,129 @@ export class Rect implements RectLike, ReadonlyRect {
     return new Rect(rect.x, rect.y, rect.width, rect.height);
   }
 
-  public static getCenter(rect: Readonly<RectLike>): ReadonlyPnt2 {
+  public getClosestPoint(point: Readonly<Pnt2Like>): Pnt2 {
+    return Rect.getClosestPoint(this, point);
+  }
+
+  public containsPoint(point: Readonly<Pnt2Like>): boolean {
+    return Rect.containsPoint(this, point);
+  }
+
+  public containsRect(rect: Readonly<RectLike>): boolean {
+    return Rect.containsRect(this, rect);
+  }
+
+  public containsCircle(circle: Readonly<CircleLike>): boolean {
+    return Rect.containsCircle(this, circle);
+  }
+
+  public containsLine(line: Readonly<Line2Like>): boolean {
+    return Rect.containsLine(this, line);
+  }
+
+  public overlapsRect(rect: Readonly<RectLike>): boolean {
+    return Rect.overlapsRect(this, rect);
+  }
+
+  public overlapsCircle(circle: Readonly<CircleLike>): boolean {
+    return Rect.overlapsCircle(this, circle);
+  }
+
+  public overlapsLine(line: Readonly<Line2Like>): boolean {
+    return Rect.overlapsLine(this, line);
+  }
+
+  public intersectRect(rect: Readonly<RectLike>): Rect | null {
+    return Rect.intersectRect(this, rect);
+  }
+
+  public intersectCircle(circle: Readonly<CircleLike>): Rect | null {
+    return Rect.intersectCircle(this, circle);
+  }
+
+  public getRectIntersectionPoints(rect: Readonly<RectLike>): Pnt2[] {
+    return Rect.getRectIntersectionPoints(this, rect);
+  }
+
+  public getCircleIntersectionPoints(circle: Readonly<CircleLike>): Pnt2[] {
+    return Rect.getCircleIntersectionPoints(this, circle);
+  }
+
+  public getLineIntersectionPoints(line: Readonly<Line2Like>): Pnt2[] {
+    return Rect.getLineIntersectionPoints(this, line);
+  }
+
+  public getBoundingRect(): Rect {
+    return Rect.getBoundingRect(this);
+  }
+
+  public equals(other: Readonly<RectLike>, epsilon = Number.EPSILON): boolean {
+    return Rect.equals(this, other, epsilon);
+  }
+
+  public copy(other: Readonly<RectLike>): this {
+    this.x = other.x;
+    this.y = other.y;
+    this.width = other.width;
+    this.height = other.height;
+
+    return this;
+  }
+
+  public clone(): Rect {
+    return new Rect(this.x, this.y, this.width, this.height);
+  }
+
+  public toString(): string {
+    const x = this.x.toFixed(1);
+    const y = this.y.toFixed(1);
+    const width = this.width.toFixed(1);
+    const height = this.height.toFixed(1);
+
+    return `Rect(x:${x}, y:${y}, w:${width}, h:${height})`;
+  }
+}
+
+export namespace Rect {
+  export function getCenter(rect: Readonly<RectLike>): Pnt2 {
     return new Pnt2(rect.x + rect.width / 2, rect.y + rect.height / 2);
   }
 
-  public static getLeft(rect: Readonly<RectLike>): number {
+  export function getLeft(rect: Readonly<RectLike>): number {
     return rect.x;
   }
 
-  public static getRight(rect: Readonly<RectLike>): number {
+  export function getRight(rect: Readonly<RectLike>): number {
     return rect.x + rect.width;
   }
 
-  public static getTop(rect: Readonly<RectLike>): number {
+  export function getTop(rect: Readonly<RectLike>): number {
     return rect.y;
   }
 
-  public static getBottom(rect: Readonly<RectLike>): number {
+  export function getBottom(rect: Readonly<RectLike>): number {
     return rect.y + rect.height;
   }
 
-  public static getTopLeft(rect: Readonly<RectLike>): Pnt2 {
+  export function getTopLeft(rect: Readonly<RectLike>): Pnt2 {
     return new Pnt2(rect.x, rect.y);
   }
 
-  public static getTopRight(rect: Readonly<RectLike>): Pnt2 {
+  export function getTopRight(rect: Readonly<RectLike>): Pnt2 {
     return new Pnt2(rect.x + rect.width, rect.y);
   }
 
-  public static getBottomLeft(rect: Readonly<RectLike>): Pnt2 {
+  export function getBottomLeft(rect: Readonly<RectLike>): Pnt2 {
     return new Pnt2(rect.x, rect.y + rect.height);
   }
 
-  public static getBottomRight(rect: Readonly<RectLike>): Pnt2 {
+  export function getBottomRight(rect: Readonly<RectLike>): Pnt2 {
     return new Pnt2(rect.x + rect.width, rect.y + rect.height);
   }
 
-  public static getCorners(rect: Readonly<RectLike>): [Pnt2, Pnt2, Pnt2, Pnt2] {
+  export function getCorners(
+    rect: Readonly<RectLike>,
+  ): [Pnt2, Pnt2, Pnt2, Pnt2] {
     return [
       Rect.getTopLeft(rect),
       Rect.getTopRight(rect),
@@ -146,7 +230,7 @@ export class Rect implements RectLike, ReadonlyRect {
     ];
   }
 
-  public static getEdges(
+  export function getEdges(
     rect: Readonly<RectLike>,
   ): [Line2, Line2, Line2, Line2] {
     const corners = Rect.getCorners(rect);
@@ -159,7 +243,7 @@ export class Rect implements RectLike, ReadonlyRect {
     ];
   }
 
-  public static getClosestPoint(
+  export function getClosestPoint(
     rect: Readonly<RectLike>,
     point: Readonly<Pnt2Like>,
   ): Pnt2 {
@@ -199,7 +283,7 @@ export class Rect implements RectLike, ReadonlyRect {
     return result;
   }
 
-  public static containsPoint(
+  export function containsPoint(
     rect: Readonly<RectLike>,
     point: Readonly<Pnt2Like>,
   ): boolean {
@@ -211,7 +295,7 @@ export class Rect implements RectLike, ReadonlyRect {
     );
   }
 
-  public static containsRect(
+  export function containsRect(
     first: Readonly<RectLike>,
     second: Readonly<RectLike>,
   ): boolean {
@@ -223,22 +307,31 @@ export class Rect implements RectLike, ReadonlyRect {
     );
   }
 
-  public static containsCircle(
+  export function containsCircle(
     rect: Readonly<RectLike>,
     circle: Readonly<CircleLike>,
   ): boolean {
-    if (!Rect.containsPoint(rect, circle.center)) {
+    if (!Rect.containsPoint(rect, circle)) {
       return false;
     }
 
-    const closestPoint = Rect.getClosestPoint(rect, circle.center);
-    const distanceSquared = closestPoint.distanceToSquared(circle.center);
+    const closestPoint = Rect.getClosestPoint(rect, circle);
+    const distanceSquared = closestPoint.distanceToSquared(circle);
     const radiusSquared = Math.pow(circle.radius, 2);
 
     return radiusSquared <= distanceSquared;
   }
 
-  public static overlapsRect(
+  export function containsLine(
+    rect: Readonly<RectLike>,
+    line: Readonly<Line2Like>,
+  ): boolean {
+    return (
+      Rect.containsPoint(rect, line.start) && Rect.containsPoint(rect, line.end)
+    );
+  }
+
+  export function overlapsRect(
     first: Readonly<RectLike>,
     second: Readonly<RectLike>,
   ): boolean {
@@ -250,63 +343,38 @@ export class Rect implements RectLike, ReadonlyRect {
     );
   }
 
-  public static overlapsCircle(
+  export function overlapsCircle(
     rect: Readonly<RectLike>,
     circle: Readonly<CircleLike>,
   ): boolean {
-    if (Rect.containsPoint(rect, circle.center)) {
+    if (Rect.containsPoint(rect, circle)) {
       return true;
     }
 
-    const closestPoint = Rect.getClosestPoint(rect, circle.center);
+    const closestPoint = Rect.getClosestPoint(rect, circle);
 
     return Circle.containsPoint(circle, closestPoint);
   }
 
-  public static getRectIntersectionPoints(
-    first: Readonly<RectLike>,
-    second: Readonly<RectLike>,
-  ): Pnt2[] {
-    if (!Rect.overlapsRect(first, second)) {
-      return [];
-    }
-
-    const edges1 = Rect.getEdges(first);
-    const edges2 = Rect.getEdges(second);
-    const intersections: Pnt2[] = [];
-
-    for (const edge1 of edges1) {
-      for (const edge2 of edges2) {
-        const intersectionPoint = Line2.intersectLine(edge1, edge2);
-
-        if (intersectionPoint) {
-          intersections.push(intersectionPoint);
-        }
-      }
-    }
-
-    return intersections;
+  export function overlapsLine(
+    rect: Readonly<RectLike>,
+    line: Readonly<Line2Like>,
+  ): boolean {
+    return (
+      Rect.containsLine(rect, line) ||
+      Rect.getEdges(rect).some((e) => Rect.getLineIntersectionPoints(rect, e))
+    );
   }
 
-  public static getCircleIntersectionPoints(
+  export function intersectCircle(
     rect: Readonly<RectLike>,
     circle: Readonly<CircleLike>,
-  ): Pnt2[] {
-    const edges = Rect.getEdges(rect);
-    const intersections: Pnt2[] = [];
-
-    for (const edge of edges) {
-      const intersection = Line2.intersectCircle(edge, circle);
-
-      if (intersection) {
-        intersections.push(...intersection);
-      }
-    }
-
-    return intersections;
+  ): Rect | null {
+    // TODO not accurate
+    return Rect.intersectRect(rect, Circle.getBoundingRect(circle));
   }
 
-  public static intersectRect(
+  export function intersectRect(
     first: Readonly<RectLike>,
     second: Readonly<RectLike>,
   ): Rect | null {
@@ -324,19 +392,65 @@ export class Rect implements RectLike, ReadonlyRect {
     return new Rect(xMin, yMin, width, height);
   }
 
-  public static intersectCircle(
-    rect: Readonly<RectLike>,
-    circle: Readonly<CircleLike>,
-  ): Rect | null {
-    // TODO not accurate
-    return Rect.intersectRect(rect, Circle.getBoundingRect(circle));
+  export function getRectIntersectionPoints(
+    first: Readonly<RectLike>,
+    second: Readonly<RectLike>,
+  ): Pnt2[] {
+    if (!Rect.overlapsRect(first, second)) {
+      return [];
+    }
+
+    const edges1 = Rect.getEdges(first);
+    const edges2 = Rect.getEdges(second);
+    const intersections: Pnt2[] = [];
+
+    for (const edge1 of edges1) {
+      for (const edge2 of edges2) {
+        const intersectionPoints = Line2.getLineIntersectionPoints(
+          edge1,
+          edge2,
+        );
+
+        if (intersectionPoints.length > 0) {
+          intersections.push(...intersectionPoints);
+        }
+      }
+    }
+
+    return intersections;
   }
 
-  public static getBoundingRect(rect: Readonly<RectLike>): Rect {
+  export function getCircleIntersectionPoints(
+    rect: Readonly<RectLike>,
+    circle: Readonly<CircleLike>,
+  ): Pnt2[] {
+    const edges = Rect.getEdges(rect);
+    const intersections: Pnt2[] = [];
+
+    for (const edge of edges) {
+      const intersection = Line2.getCircleIntersectionPoints(edge, circle);
+
+      if (intersection) {
+        intersections.push(...intersection);
+      }
+    }
+
+    return intersections;
+  }
+
+  export function getLineIntersectionPoints(
+    rect: Readonly<RectLike>,
+    line: Readonly<Line2Like>,
+  ): Pnt2[] {
+    // TODO
+    throw new Error("Not implemented");
+  }
+
+  export function getBoundingRect(rect: Readonly<RectLike>): Rect {
     return Rect.from(rect);
   }
 
-  public static equals(
+  export function equals(
     first: Readonly<RectLike>,
     second: Readonly<RectLike>,
     epsilon = Number.EPSILON,
@@ -347,74 +461,5 @@ export class Rect implements RectLike, ReadonlyRect {
       Math.abs(first.x + first.width - second.x + second.width) < epsilon &&
       Math.abs(first.y + first.height - second.y + second.height) < epsilon
     );
-  }
-
-  public getClosestPoint(point: Readonly<Pnt2Like>): Pnt2 {
-    return Rect.getClosestPoint(this, point);
-  }
-
-  public containsPoint(point: Readonly<Pnt2Like>): boolean {
-    return Rect.containsPoint(this, point);
-  }
-
-  public containsRect(rect: Readonly<RectLike>): boolean {
-    return Rect.containsRect(this, rect);
-  }
-
-  public containsCircle(circle: Readonly<CircleLike>): boolean {
-    return Rect.containsCircle(this, circle);
-  }
-
-  public overlapsRect(rect: Readonly<RectLike>): boolean {
-    return Rect.overlapsRect(this, rect);
-  }
-
-  public overlapsCircle(circle: Readonly<CircleLike>): boolean {
-    return Rect.overlapsCircle(this, circle);
-  }
-
-  public getRectIntersectionPoints(rect: Readonly<RectLike>): Pnt2[] {
-    return Rect.getRectIntersectionPoints(this, rect);
-  }
-
-  public getCircleIntersectionPoints(circle: Readonly<CircleLike>): Pnt2[] {
-    return Rect.getCircleIntersectionPoints(this, circle);
-  }
-
-  public intersectRect(rect: Readonly<RectLike>): Rect | null {
-    return Rect.intersectRect(this, rect);
-  }
-
-  public intersectCircle(circle: Readonly<CircleLike>): Rect | null {
-    return Rect.intersectCircle(this, circle);
-  }
-
-  public getBoundingRect(): Rect {
-    return Rect.getBoundingRect(this);
-  }
-
-  public equals(other: Readonly<RectLike>, epsilon = Number.EPSILON): boolean {
-    return Rect.equals(this, other, epsilon);
-  }
-
-  public copy(other: Readonly<RectLike>): this {
-    this.x = other.x;
-    this.y = other.y;
-    this.width = other.width;
-    this.height = other.height;
-    return this;
-  }
-
-  public clone(): Rect {
-    return new Rect(this.x, this.y, this.width, this.height);
-  }
-
-  public toString(): string {
-    const x = this.x.toFixed(1);
-    const y = this.y.toFixed(1);
-    const width = this.width.toFixed(1);
-    const height = this.height.toFixed(1);
-
-    return `Rect(x:${x}, y:${y}, w:${width}, h:${height})`;
   }
 }

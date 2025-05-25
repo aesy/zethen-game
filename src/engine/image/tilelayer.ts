@@ -11,7 +11,7 @@ export class TileLayer<T extends string = string> {
     return this.tiles[pos.y]?.[pos.x] ?? null;
   }
 
-  *[Symbol.iterator](): Iterator<Tile> {
+  public *[Symbol.iterator](): Iterator<Tile> {
     for (const row of this.tiles) {
       for (const column of row) {
         if (column != null) {

@@ -4,7 +4,7 @@ import { pluginSass } from "@rsbuild/plugin-sass";
 import { pluginImageCompress } from "@rsbuild/plugin-image-compress";
 import { defineConfig } from "@rsbuild/core";
 
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = process.env["NODE_ENV"] !== "production";
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig({

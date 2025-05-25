@@ -1,14 +1,12 @@
-import { bind } from "@/engine/util/decorator";
+import { bind } from "@/engine/util/bind";
 import { Scene } from "@/engine/game/scene";
 import { FpsCounter } from "@/engine/game/fps";
 
 export class Game {
   private static readonly TARGET_DT = 1 / 60;
 
-  public scene: Scene = new Scene();
-
+  private _scene: Scene = new Scene();
   private readonly fpsCounter: FpsCounter = new FpsCounter(0.5);
-
   private running: boolean = false;
   private lastTimestamp: number | null = null;
   private frame: number | null = null;
@@ -19,6 +17,15 @@ export class Game {
 
   public get fps(): number {
     return this.fpsCounter.currentFps;
+  }
+
+  public get scene(): Scene {
+    return this._scene;
+  }
+
+  public changeScene(scene: Scene): void {
+    this._scene.dispose();
+    this._scene = scene;
   }
 
   public start(): void {
@@ -56,8 +63,12 @@ export class Game {
     this.lastTimestamp = currentTimestamp;
     this.fpsCounter.tick(dt);
 
-    for (const system of this.scene.systems.getAll()) {
-      system.update(this.scene, dt);
+    for (const system of this._scene.systems.getAll()) {
+      system.update(this._scene, dt);
+    }
+
+    if (Math.random() > 0.9) {
+      // console.log("fps", Math.round(this.fpsCounter.currentFps * 10) / 10);
     }
 
     this.frame = requestAnimationFrame(this.update);

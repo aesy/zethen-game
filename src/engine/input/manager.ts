@@ -1,4 +1,4 @@
-import { bind } from "@/engine/util/decorator";
+import { bind } from "@/engine/util/bind";
 import { Pnt2, Pnt2Like } from "@/engine/math/pnt2";
 
 export class InputManager {

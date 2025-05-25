@@ -1,20 +1,29 @@
-import { Pnt3, Pnt3Like } from "@/engine/math/pnt3";
+import { clamp } from "@/engine/util/math";
+import { Pnt3 } from "@/engine/math/pnt3";
+import { Mat3x3Like } from "./mat3x3";
 
-export type Vec3Like = Pnt3Like;
+export type Vec3Like = {
+  x: number;
+  y: number;
+  z: number;
+};
 
 export type ReadonlyVec3 = Readonly<Vec3Like> & {
-  angle: number;
-  magnitude: number;
-  magnitudeSquared: number;
-  dot(other: Readonly<Pnt3Like>): number;
-  equals(other: Readonly<Pnt3Like>, epsilon?: number): boolean;
+  readonly magnitude: number;
+  readonly magnitudeSquared: number;
+  dot(other: Readonly<Vec3Like>): number;
+  cross(other: Readonly<Vec3Like>): Vec3;
   isZero(epsilon?: number): boolean;
   isNan(): boolean;
+  equals(other: Readonly<Vec3Like>, epsilon?: number): boolean;
   clone(): Vec3;
+  toPoint(): Pnt3;
   toString(): string;
 };
 
 export class Vec3 implements Vec3Like, ReadonlyVec3 {
+  public static ZERO: ReadonlyVec3 = Vec3.zero();
+
   constructor(
     public x: number,
     public y: number,
@@ -26,188 +35,43 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
   }
 
   public set magnitude(magnitude: number) {
-    const angle = this.angle;
-    this.x = magnitude * Math.cos(angle);
-    this.y = magnitude * Math.sin(angle);
-    this.z = magnitude * Math.sin(angle); // TODO
+    Vec3.setMagnitude(this, magnitude);
   }
 
   public get magnitudeSquared(): number {
     return Vec3.getMagnitudeSquared(this);
   }
 
-  public get angle(): number {
-    return Vec3.getAngle(this);
-  }
-
-  public set angle(angle: number) {
-    const magnitude = this.magnitude;
-    this.x = magnitude * Math.cos(angle);
-    this.y = magnitude * Math.sin(angle);
-    this.z = magnitude * Math.sin(angle);
-  }
-
-  public static identity(): Vec3 {
-    return new Vec3(1, 1, 1);
-  }
-
-  public static fromAngle(angle: number, magnitude = 1): Vec3 {
-    const vector = Vec3.zero();
-    vector.magnitude = magnitude;
-    vector.angle = angle;
-    return vector;
-  }
-
-  public static from(point: Readonly<Pnt3Like>): Vec3 {
-    return new Vec3(point.x, point.y, point.z);
-  }
-
   public static zero(): Vec3 {
     return new Vec3(0, 0, 0);
   }
 
-  public static getAngle(vec: Readonly<Vec3Like>): number {
-    // TODO
-    return Math.atan2(vec.y, vec.x);
-  }
-
-  public static getMagnitude(vec: Readonly<Vec3Like>): number {
-    return Math.sqrt(Vec3.getMagnitudeSquared(vec));
-  }
-
-  public static getMagnitudeSquared(vec: Readonly<Vec3Like>): number {
-    return Math.pow(vec.x, 2) + Math.pow(vec.y, 2) + Math.pow(vec.z, 2);
-  }
-
-  public static dot(
-    first: Readonly<Vec3Like>,
-    second: Readonly<Vec3Like>,
-  ): number {
-    return first.x * second.x + first.y * second.y + first.z * second.z;
-  }
-
-  public static cross(
+  public static direction(
     first: Readonly<Vec3Like>,
     second: Readonly<Vec3Like>,
   ): Vec3 {
-    return new Vec3(
-      first.y * second.z - first.z * second.y,
-      first.z * second.x - first.x * second.z,
-      first.x * second.y - first.y * second.x,
-    );
+    return Vec3.from(second).subtract(first);
   }
 
-  public static normalize(vec: Readonly<Vec3Like>): Vec3 {
-    return Vec3.from(vec).normalize();
-  }
-
-  public static rotate(vec: Readonly<Vec3Like>, radians: number): Vec3 {
-    return Vec3.from(vec).rotate(radians);
-  }
-
-  public static add(
-    first: Readonly<Vec3Like>,
-    second: Readonly<Vec3Like>,
-  ): Vec3 {
-    return Vec3.from(first).add(second);
-  }
-
-  public static addScalar(first: Readonly<Vec3Like>, scalar: number): Vec3 {
-    return Vec3.from(first).addScalar(scalar);
-  }
-
-  public static subtract(
-    first: Readonly<Vec3Like>,
-    second: Readonly<Vec3Like>,
-  ): Vec3 {
-    return Vec3.from(first).subtract(second);
-  }
-
-  public static subtractScalar(
-    first: Readonly<Vec3Like>,
-    scalar: number,
-  ): Vec3 {
-    return Vec3.from(first).subtractScalar(scalar);
-  }
-
-  public static multiply(
-    first: Readonly<Vec3Like>,
-    second: Readonly<Vec3Like>,
-  ): Vec3 {
-    return Vec3.from(first).multiply(second);
-  }
-
-  public static multiplyScalar(
-    first: Readonly<Vec3Like>,
-    scalar: number,
-  ): Vec3 {
-    return Vec3.from(first).multiplyScalar(scalar);
-  }
-
-  public static divide(
-    first: Readonly<Vec3Like>,
-    second: Readonly<Vec3Like>,
-  ): Vec3 {
-    return Vec3.from(first).divide(second);
-  }
-
-  public static divideScalar(first: Readonly<Vec3Like>, scalar: number): Vec3 {
-    return Vec3.from(first).divideScalar(scalar);
-  }
-
-  public static negate(vec: Readonly<Vec3Like>): Vec3 {
-    return Vec3.from(vec).negate();
-  }
-
-  public static abs(vec: Readonly<Vec3Like>): Vec3 {
-    return Vec3.from(vec).abs();
-  }
-
-  public static isZero(
-    vec: Readonly<Vec3Like>,
-    epsilon = Number.EPSILON,
-  ): boolean {
-    return Vec3.equals(Pnt3.ORIGIN, vec, epsilon);
-  }
-
-  public static isNan(vec: Readonly<Vec3Like>): boolean {
-    return isNaN(vec.x) || isNaN(vec.y) || isNaN(vec.z);
-  }
-
-  public static equals(
-    first: Readonly<Vec3Like>,
-    second: Readonly<Vec3Like>,
-    epsilon: number = Number.EPSILON,
-  ): boolean {
-    return (
-      Math.abs(first.x - second.x) < epsilon &&
-      Math.abs(first.y - second.y) < epsilon &&
-      Math.abs(first.z - second.z) < epsilon
-    );
+  public static from(vec: Readonly<Partial<Vec3Like>>): Vec3 {
+    return new Vec3(vec.x ?? 0, vec.y ?? 0, vec.z ?? 0);
   }
 
   public dot(other: Readonly<Vec3Like>): number {
-    return this.x * other.x + this.y * other.y + this.z * other.z;
+    return Vec3.dot(this, other);
+  }
+
+  public cross(other: Readonly<Vec3Like>): Vec3 {
+    return Vec3.from(Vec3.cross(this, other));
   }
 
   public normalize(): this {
     const magnitude = this.magnitude;
-    this.x /= magnitude || 1;
-    this.y /= magnitude || 1;
-    this.z /= magnitude || 1;
-    return this;
-  }
 
-  public rotate(radians: number): this {
-    const sin = Math.sin(radians);
-    const cos = Math.cos(radians);
-    const x = this.x;
-    const y = this.y;
-    const z = this.z;
+    this.x = this.x / magnitude || 1;
+    this.y = this.y / magnitude || 1;
+    this.z = this.z / magnitude || 1;
 
-    this.x = cos * x - sin * y;
-    this.y = sin * x + cos * y;
-    this.z = sin * x + cos * z; // TODO
     return this;
   }
 
@@ -218,10 +82,10 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
     return this;
   }
 
-  public addScalar(other: number): this {
-    this.x += other;
-    this.y += other;
-    this.z += other;
+  public addScalar(scalar: number): this {
+    this.x += scalar;
+    this.y += scalar;
+    this.z += scalar;
     return this;
   }
 
@@ -232,10 +96,10 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
     return this;
   }
 
-  public subtractScalar(other: number): this {
-    this.x -= other;
-    this.y -= other;
-    this.z -= other;
+  public subtractScalar(scalar: number): this {
+    this.x -= scalar;
+    this.y -= scalar;
+    this.z -= scalar;
     return this;
   }
 
@@ -246,10 +110,10 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
     return this;
   }
 
-  public multiplyScalar(other: number): this {
-    this.x *= other;
-    this.y *= other;
-    this.z *= other;
+  public multiplyScalar(scalar: number): this {
+    this.x *= scalar;
+    this.y *= scalar;
+    this.z *= scalar;
     return this;
   }
 
@@ -267,6 +131,14 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
     return this;
   }
 
+  public transformMat3(mat: Readonly<Mat3x3Like>): this {
+    const { x, y, z } = this;
+    this.x = x * mat[0] + y * mat[3] + z * mat[6];
+    this.y = x * mat[1] + y * mat[4] + z * mat[7];
+    this.z = x * mat[2] + y * mat[5] + z * mat[8];
+    return this;
+  }
+
   public negate(): this {
     this.x *= -1;
     this.y *= -1;
@@ -274,10 +146,25 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
     return this;
   }
 
-  public abs(): this {
-    this.x = Math.abs(this.x);
-    this.y = Math.abs(this.y);
-    this.z = Math.abs(this.z);
+  public invert(): this {
+    this.x = 1 / this.x;
+    this.y = 1 / this.y;
+    this.z = 1 / this.z;
+    return this;
+  }
+
+  public maxMagnitude(value: number): this {
+    this.magnitude = Math.max(this.magnitude, value);
+    return this;
+  }
+
+  public minMagnitude(value: number): this {
+    this.magnitude = Math.min(this.magnitude, value);
+    return this;
+  }
+
+  public clampMagnitude(min: number, max: number): this {
+    this.magnitude = clamp(this.magnitude, { min, max });
     return this;
   }
 
@@ -307,11 +194,227 @@ export class Vec3 implements Vec3Like, ReadonlyVec3 {
     return new Vec3(this.x, this.y, this.z);
   }
 
+  public toPoint(): Pnt3 {
+    return Pnt3.from(this);
+  }
+
   public toString(): string {
     const x = this.x.toFixed(1);
     const y = this.y.toFixed(1);
-    const z = this.y.toFixed(1);
+    const z = this.z.toFixed(1);
 
     return `Vec3(x:${x}, y:${y}, z:${z})`;
+  }
+}
+
+export namespace Vec3 {
+  export function getMagnitude(vec: Readonly<Vec3Like>): number {
+    return Math.sqrt(Vec3.getMagnitudeSquared(vec));
+  }
+
+  export function setMagnitude(
+    vec: Readonly<Vec3Like>,
+    magnitude: number,
+  ): Vec3Like {
+    const current = Vec3.getMagnitude(vec);
+
+    return {
+      x: (vec.x / current) * magnitude,
+      y: (vec.y / current) * magnitude,
+      z: (vec.z / current) * magnitude,
+    };
+  }
+
+  export function getMagnitudeSquared(vec: Readonly<Vec3Like>): number {
+    return Math.pow(vec.x, 2) + Math.pow(vec.y, 2) + Math.pow(vec.z, 2);
+  }
+
+  export function dot(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+  ): number {
+    return first.x * second.x + first.y * second.y + first.z * second.z;
+  }
+
+  export function cross(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+  ): Vec3Like {
+    return {
+      x: first.y * second.z - first.z * second.y,
+      y: first.z * second.x - first.x * second.z,
+      z: first.x * second.y - first.y * second.x,
+    };
+  }
+
+  export function normalize(vec: Readonly<Vec3Like>): Vec3Like {
+    const magnitude = Vec3.getMagnitude(vec);
+
+    return {
+      x: vec.x / magnitude || 1,
+      y: vec.y / magnitude || 1,
+      z: vec.z / magnitude || 1,
+    };
+  }
+
+  export function add(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+  ): Vec3Like {
+    return {
+      x: first.x + second.x,
+      y: first.y + second.y,
+      z: first.z + second.z,
+    };
+  }
+
+  export function addScalar(vec: Readonly<Vec3Like>, scalar: number): Vec3Like {
+    return {
+      x: vec.x + scalar,
+      y: vec.y + scalar,
+      z: vec.z + scalar,
+    };
+  }
+
+  export function subtract(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+  ): Vec3Like {
+    return {
+      x: first.x - second.x,
+      y: first.y - second.y,
+      z: first.z - second.z,
+    };
+  }
+
+  export function subtractScalar(
+    vec: Readonly<Vec3Like>,
+    scalar: number,
+  ): Vec3Like {
+    return {
+      x: vec.x - scalar,
+      y: vec.y - scalar,
+      z: vec.z - scalar,
+    };
+  }
+
+  export function multiply(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+  ): Vec3Like {
+    return {
+      x: first.x * second.x,
+      y: first.y * second.y,
+      z: first.z * second.z,
+    };
+  }
+
+  export function multiplyScalar(
+    vec: Readonly<Vec3Like>,
+    scalar: number,
+  ): Vec3Like {
+    return {
+      x: vec.x * scalar,
+      y: vec.y * scalar,
+      z: vec.z * scalar,
+    };
+  }
+
+  export function divide(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+  ): Vec3Like {
+    return {
+      x: first.x / second.x,
+      y: first.y / second.y,
+      z: first.z / second.z,
+    };
+  }
+
+  export function divideScalar(
+    vec: Readonly<Vec3Like>,
+    scalar: number,
+  ): Vec3Like {
+    return {
+      x: vec.x / scalar,
+      y: vec.y / scalar,
+      z: vec.z / scalar,
+    };
+  }
+
+  export function transformMat3(
+    vec: Readonly<Vec3Like>,
+    mat: Readonly<Mat3x3Like>,
+  ): Vec3Like {
+    return {
+      x: mat[0] + vec.y * mat[3] + vec.z * mat[6],
+      y: mat[1] + vec.y * mat[4] + vec.z * mat[7],
+      z: mat[2] + vec.y * mat[5] + vec.z * mat[8],
+    };
+  }
+
+  export function negate(vec: Readonly<Vec3Like>): Vec3Like {
+    return {
+      x: vec.x * -1,
+      y: vec.y * -1,
+      z: vec.z * -1,
+    };
+  }
+
+  export function invert(vec: Readonly<Vec3Like>): Vec3Like {
+    return {
+      x: 1 / vec.x,
+      y: 1 / vec.y,
+      z: 1 / vec.z,
+    };
+  }
+
+  export function maxMagnitude(
+    vec: Readonly<Vec3Like>,
+    value: number,
+  ): Vec3Like {
+    return Vec3.setMagnitude(vec, Math.max(Vec3.getMagnitude(vec), value));
+  }
+
+  export function minMagnitude(
+    vec: Readonly<Vec3Like>,
+    value: number,
+  ): Vec3Like {
+    return Vec3.setMagnitude(vec, Math.min(Vec3.getMagnitude(vec), value));
+  }
+
+  export function clampMagnitude(
+    vec: Readonly<Vec3Like>,
+    min: number,
+    max: number,
+  ): Vec3Like {
+    return Vec3.setMagnitude(vec, clamp(Vec3.getMagnitude(vec), { min, max }));
+  }
+
+  export function isZero(
+    vec: Readonly<Vec3Like>,
+    epsilon = Number.EPSILON,
+  ): boolean {
+    return (
+      Math.abs(vec.x) < epsilon &&
+      Math.abs(vec.y) < epsilon &&
+      Math.abs(vec.z) < epsilon
+    );
+  }
+
+  export function isNan(vec: Readonly<Vec3Like>): boolean {
+    return isNaN(vec.x) || isNaN(vec.y) || isNaN(vec.z);
+  }
+
+  export function equals(
+    first: Readonly<Vec3Like>,
+    second: Readonly<Vec3Like>,
+    epsilon: number = Number.EPSILON,
+  ): boolean {
+    return (
+      Math.abs(first.x - second.x) <= epsilon &&
+      Math.abs(first.y - second.y) <= epsilon &&
+      Math.abs(first.z - second.z) <= epsilon
+    );
   }
 }

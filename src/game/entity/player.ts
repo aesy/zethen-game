@@ -1,10 +1,10 @@
 import playerImg from "@/game/experimental/cat-tilesheet.png";
 import { ZIndex } from "@/game/component/zindex";
 import { Transform2D } from "@/game/component/transform2D";
+import { Health } from "@/game/component/health";
 import { Drawable } from "@/game/component/drawable";
 import { Controlled } from "@/game/component/controlled";
 import { Collidable } from "@/game/component/collidable";
-import { Circle } from "@/game/component/circle";
 import {
   Character,
   FacingDirection,
@@ -19,7 +19,6 @@ import {
 } from "@/game/component/animated";
 import { Player } from "@/game/archetype/player";
 import { loadImage } from "@/engine/util/image";
-import { Rgba } from "@/engine/math/rgba";
 import { Rect } from "@/engine/math/rect";
 import { Pnt2 } from "@/engine/math/pnt2";
 import { Dim2 } from "@/engine/math/dim2";
@@ -77,7 +76,7 @@ export async function createPlayer(entities: EntityManager): Promise<EntityId> {
   ]);
 
   const player = entities.createArchetype(Player, {
-    transform: new Transform2D(new Pnt2(400, 400)),
+    transform: new Transform2D(new Pnt2(0, 0)),
     character: new Character(
       LocationState.GROUNDED,
       MovementState.IDLE,
@@ -85,7 +84,11 @@ export async function createPlayer(entities: EntityManager): Promise<EntityId> {
     ),
     controlled: new Controlled(),
     collidable: new Collidable(new Rect(-30, -30, 60, 60)),
-    drawable: new Drawable(idleSpritesheet[0], Pnt2.zero(), new Dim2(64, 64)),
+    drawable: new Drawable(
+      idleSpritesheet[0],
+      new Pnt2(-32, -32),
+      new Dim2(64, 64),
+    ),
     animated: new Animated(
       {
         [CharacterAnimation.IDLE]: new FrameAnimation(idleSpritesheet, 0.15),
@@ -96,12 +99,11 @@ export async function createPlayer(entities: EntityManager): Promise<EntityId> {
       CharacterAnimation.WALKING,
     ),
     zIndex: new ZIndex(3),
+    health: new Health(9),
   });
 
-  // Add "shadow"
   entities.createEntity([
     new Transform2D(),
-    new Circle(20, new Rgba(255, 0, 0)),
     new Attached(player),
     new ZIndex(2),
   ]);

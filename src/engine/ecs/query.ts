@@ -135,6 +135,7 @@ export class Query<T extends EntityDescriptor> implements Queryable<T> {
       constraint: Constraint.NONE,
     };
     this.id = QueryId.addConstraint(this.id, type.id, Constraint.NONE);
+
     // @ts-ignore
     return this;
   }
@@ -156,6 +157,7 @@ export class Query<T extends EntityDescriptor> implements Queryable<T> {
       constraint: Constraint.SINGLE,
     };
     this.id = QueryId.addConstraint(this.id, type.id, Constraint.SINGLE);
+
     // @ts-ignore
     return this;
   }

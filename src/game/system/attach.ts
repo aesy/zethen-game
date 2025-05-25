@@ -19,12 +19,7 @@ export class AttachSystem implements System {
       );
 
       if (targetEntity) {
-        const diff = targetEntity.position
-          .clone()
-          .subtract(transform.position)
-          .multiplyScalar(5)
-          .multiplyScalar(dt);
-        transform.position.add(diff);
+        transform.position.copy(targetEntity.position);
       }
     }
   }

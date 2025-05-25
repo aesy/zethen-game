@@ -2,22 +2,16 @@ import { describe, expect, it } from "vitest";
 import { Vec2 } from "@/engine/math/vec2";
 
 describe("Vec2", () => {
-  describe(".identity", () => {
-    it("should return a vector with components of 1", () => {
-      expect(Vec2.identity()).toEqual({ x: 1, y: 1 });
-    });
-  });
-
-  describe(".fromAngle", () => {
+  describe(".unit", () => {
     it("should return a vector with the given angle", () => {
-      expect(Vec2.fromAngle(0).x).toBeCloseTo(1);
-      expect(Vec2.fromAngle(0).y).toBeCloseTo(0);
-      expect(Vec2.fromAngle(Math.PI / 2).x).toBeCloseTo(0);
-      expect(Vec2.fromAngle(Math.PI / 2).y).toBeCloseTo(1);
-      expect(Vec2.fromAngle(Math.PI).x).toBeCloseTo(-1);
-      expect(Vec2.fromAngle(Math.PI).y).toBeCloseTo(0);
-      expect(Vec2.fromAngle(Math.PI * 2).x).toBeCloseTo(1);
-      expect(Vec2.fromAngle(Math.PI * 2).y).toBeCloseTo(0);
+      expect(Vec2.unit(0).x).toBeCloseTo(1);
+      expect(Vec2.unit(0).y).toBeCloseTo(0);
+      expect(Vec2.unit(Math.PI / 2).x).toBeCloseTo(0);
+      expect(Vec2.unit(Math.PI / 2).y).toBeCloseTo(1);
+      expect(Vec2.unit(Math.PI).x).toBeCloseTo(-1);
+      expect(Vec2.unit(Math.PI).y).toBeCloseTo(0);
+      expect(Vec2.unit(Math.PI * 2).x).toBeCloseTo(1);
+      expect(Vec2.unit(Math.PI * 2).y).toBeCloseTo(0);
     });
   });
 
@@ -36,12 +30,11 @@ describe("Vec2", () => {
       const vec = new Vec2(3, 5);
 
       expect(Vec2.zero().magnitude).toEqual(0);
-      expect(Vec2.identity().magnitude).toEqual(Math.sqrt(2));
       expect(vec.magnitude).toEqual(5.830951894845301);
     });
 
     it("should be mutable", () => {
-      const vec = Vec2.fromAngle(20);
+      const vec = Vec2.unit(20);
       vec.magnitude = 5;
 
       expect(vec.magnitude).toEqual(5);
@@ -55,7 +48,6 @@ describe("Vec2", () => {
       const vec = new Vec2(3, 5);
 
       expect(Vec2.zero().magnitudeSquared).toEqual(0);
-      expect(Vec2.identity().magnitudeSquared).toEqual(2);
       expect(vec.magnitudeSquared).toEqual(34);
     });
   });
@@ -65,12 +57,11 @@ describe("Vec2", () => {
       const vec = new Vec2(3, 5);
 
       expect(Vec2.zero().angle).toEqual(0);
-      expect(Vec2.identity().angle).toEqual(Math.PI / 4);
       expect(vec.angle).toEqual(1.0303768265243125);
     });
 
     it("should be mutable", () => {
-      const vec = Vec2.fromAngle(20);
+      const vec = Vec2.unit(20);
       vec.angle = Math.PI / 2;
 
       expect(vec.angle).toBeCloseTo(Math.PI / 2);

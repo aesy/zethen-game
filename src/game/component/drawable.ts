@@ -5,7 +5,6 @@ import { Component, ComponentId } from "@/engine/ecs/component";
 export class Drawable implements Component {
   public static readonly id: ComponentId = ComponentId.next();
 
-  public centered = true;
   public flipX = false;
   public flipY = false;
 

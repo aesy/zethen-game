@@ -29,7 +29,26 @@ export class EventBus {
     };
   }
 
-  // TODO single
+  public once<T extends Event>(
+    type: EventType<T>,
+    callback: Callback<T>,
+  ): EventHandle {
+    const callbacks = this.events.get(type);
+    const wrapper: Callback<T> = (event) => {
+      callback(event);
+      this.unregister(type, wrapper);
+    };
+
+    if (callbacks) {
+      callbacks.push(wrapper);
+    } else {
+      this.events.set(type, [wrapper]);
+    }
+
+    return {
+      unregister: () => this.unregister(type, wrapper),
+    };
+  }
 
   public unregister<T extends Event>(
     type: EventType<T>,
