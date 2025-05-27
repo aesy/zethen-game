@@ -136,7 +136,7 @@ export class QuadTree<T> {
     }
 
     if (this.children) {
-      return this.children.reduce((prev, q) => q.insert(elem) || prev, false);
+      return this.children.reduce((prev, q) => prev || q.insert(elem), false);
     }
 
     if (
@@ -150,6 +150,7 @@ export class QuadTree<T> {
       this.config.maximumDepth > 0
     ) {
       this.divide();
+      return this.children!.reduce((prev, q) => prev || q.insert(elem), false);
     }
 
     return false;

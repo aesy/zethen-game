@@ -16,11 +16,13 @@ import {
   CharacterAnimation,
   FrameAnimation,
 } from "@/game/component/animated";
+import { Animal, Diet } from "@/game/component/animal";
 import { Player } from "@/game/archetype/player";
 import { loadImage } from "@/engine/util/image";
 import { Rect } from "@/engine/math/rect";
 import { Pnt2 } from "@/engine/math/pnt2";
 import { Dim2 } from "@/engine/math/dim2";
+import { Circle } from "@/engine/math/circle";
 import { SpriteSheet } from "@/engine/image/spritesheet";
 import { EntityManager } from "@/engine/ecs/entitymanager";
 import { EntityId } from "@/engine/ecs/entity";
@@ -82,8 +84,10 @@ export async function createPlayer(entities: EntityManager): Promise<EntityId> {
       MovementState.IDLE,
       FacingDirection.EAST,
     ),
+    animal: new Animal(Diet.CARNIVORE),
     controlled: new Controlled(),
-    collidable: new Collidable(new Rect(-30, -30, 60, 60)),
+    // collidable: new Collidable(new Rect(-30, -30, 60, 60)),
+    collidable: new Collidable(new Circle(0, 0, 25)),
     drawable: new Drawable(
       idleSpritesheet[0],
       new Pnt2(-32, -32),

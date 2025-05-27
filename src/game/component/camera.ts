@@ -99,6 +99,7 @@ export class Camera implements Component {
     rect: Readonly<RectLike>,
     canvas: Readonly<Dim2Like>,
   ): boolean {
+    // TODO optimize, move out to functions
     const view = {
       x: -canvas.width / 2,
       y: -canvas.height / 2,
@@ -107,26 +108,27 @@ export class Camera implements Component {
     };
     const matrix = this.getMatrix(camera, canvas)!.data;
     const topLeft = Camera.worldToScreen(matrix, Rect.getTopLeft(rect));
-
-    if (Rect.containsPoint(view, topLeft)) {
-      return true;
-    }
-
     const topRight = Camera.worldToScreen(matrix, Rect.getTopRight(rect));
-
-    if (Rect.containsPoint(view, topRight)) {
-      return true;
-    }
-
     const bottomRight = Camera.worldToScreen(matrix, Rect.getBottomRight(rect));
-
-    if (Rect.containsPoint(view, bottomRight)) {
-      return true;
-    }
-
     const bottomLeft = Camera.worldToScreen(matrix, Rect.getBottomLeft(rect));
 
-    return Rect.containsPoint(view, bottomLeft);
+    const screenRect = {
+      x: Math.min(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x),
+      y: Math.min(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y),
+      width:
+        Math.max(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x) -
+        Math.min(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x),
+      height:
+        Math.max(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y) -
+        Math.min(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y),
+    };
+
+    return !(
+      screenRect.x + screenRect.width < view.x ||
+      screenRect.x > view.x + view.width ||
+      screenRect.y + screenRect.height < view.y ||
+      screenRect.y > view.y + view.height
+    );
   }
 
   private getZoomLevel(canvas: Readonly<Dim2Like>): number {

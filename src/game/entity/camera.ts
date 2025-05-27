@@ -15,8 +15,8 @@ export function createCamera(
   return entities.createArchetype(Camera, {
     transform: new Transform2D(transform?.position?.clone()),
     camera: new CameraComponent(
-      ScaleMode.CHANGE_HEIGHT_TO_FIT_CANVAS,
-      new Dim2(1000, 600),
+      ScaleMode.CHANGE_LENGTH_TO_FIT_CANVAS,
+      new Dim2(1200, 800),
     ),
     attached: new Attached(target),
   });

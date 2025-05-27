@@ -1,9 +1,9 @@
 import { clamp } from "@/engine/util/math";
+import { Vec2, Vec2Like } from "@/engine/math/vec2";
 import { Pnt2, Pnt2Like, ReadonlyPnt2 } from "@/engine/math/pnt2";
+import { Mat3x3Like } from "@/engine/math/mat3x3";
 import { Line2, Line2Like, ReadonlyLine2 } from "@/engine/math/line2";
 import { Circle, CircleLike } from "@/engine/math/circle";
-
-// TODO translate, rotate, scale, transform
 
 export type RectLike = {
   x: number;
@@ -97,6 +97,43 @@ export class Rect implements RectLike, ReadonlyRect {
 
   public static from(rect: Readonly<RectLike>): Rect {
     return new Rect(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  public translate(vec: Readonly<Vec2Like>): this {
+    this.x += vec.x;
+    this.y += vec.y;
+
+    return this;
+  }
+
+  public rotate(radians: number): this {
+    throw new Error("Not implemented");
+  }
+
+  public scale(vec: Readonly<Vec2Like>): this {
+    // TODO wrong
+    const center = this.center;
+    const newWidth = this.width * vec.x;
+    const newHeight = this.height * vec.y;
+
+    this.x = center.x - newWidth / 2;
+    this.y = center.y - newHeight / 2;
+    this.width = newWidth;
+    this.height = newHeight;
+
+    return this;
+  }
+
+  public transform(mat: Readonly<Mat3x3Like>): this {
+    const topLeft = Vec2.transformMat3(this.topLeft, mat);
+    const bottomRight = Vec2.transformMat3(this.bottomRight, mat);
+
+    this.x = topLeft.x;
+    this.y = topLeft.y;
+    this.width = bottomRight.x - topLeft.x;
+    this.height = bottomRight.y - topLeft.y;
+
+    return this;
   }
 
   public getClosestPoint(point: Readonly<Pnt2Like>): Pnt2 {

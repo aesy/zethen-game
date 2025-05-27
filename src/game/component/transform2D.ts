@@ -13,7 +13,7 @@ export class Transform2D implements Component {
   ) {}
 
   public get matrix(): Mat3x3 {
-    // TODO cache
+    // TODO cache?
     const sin = Math.sin(this.rotation);
     const cos = Math.cos(this.rotation);
 

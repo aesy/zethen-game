@@ -21,7 +21,7 @@ export function createBox(entities: EntityManager): EntityId {
     (Math.random() * 1000 - 500) * 0.2,
   );
   const size = new Dim2(Math.random() * 80 + 20, Math.random() * 80 + 20);
-  const rectangle = new Rectangle(size, new Rgba(0, 0, 255, 1));
+  const rectangle = new Rectangle(size, new Rgba(193, 66, 63, 1));
   const physical = new Physical(10, velocity);
   const collidable = new Collidable(new Rect(0, 0, size.width, size.height));
   const zIndex = new ZIndex(1);

@@ -3,7 +3,6 @@ import { Drawable } from "@/game/component/drawable";
 import { Collidable } from "@/game/component/collidable";
 import { Tile } from "@/game/archetype/tile";
 import { Camera } from "@/game/archetype/camera";
-import { Rect } from "@/engine/math/rect";
 import { Pnt2 } from "@/engine/math/pnt2";
 import { Dim2 } from "@/engine/math/dim2";
 import { TileSet } from "@/engine/image/tileset";
@@ -13,6 +12,9 @@ import { System } from "@/engine/ecs/system";
 import { EntityId } from "@/engine/ecs/entity";
 
 const GRID_SIZE = 128;
+
+// Make tiles overlap to avoid artifacts when drawing
+const OVERLAP = 10;
 
 export class TileMapSystem implements System {
   private readonly tiles: EntityId[] = [];
@@ -96,8 +98,8 @@ export class TileMapSystem implements System {
 
             const drawable = new Drawable(
               image,
-              Pnt2.zero(),
-              new Dim2(GRID_SIZE, GRID_SIZE),
+              new Pnt2(-OVERLAP, -OVERLAP),
+              new Dim2(GRID_SIZE + OVERLAP, GRID_SIZE + OVERLAP),
             );
 
             if (entity === undefined) {

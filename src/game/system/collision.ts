@@ -21,8 +21,8 @@ export class CollisionSystem implements System {
 
     // TODO
     const simulationBounds = {
-      x: -10000,
-      y: -10000,
+      x: 0,
+      y: 0,
       width: 20000,
       height: 20000,
     };
@@ -41,114 +41,78 @@ export class CollisionSystem implements System {
         collidable: { collider },
       } = movable;
 
-      const bounds = collider.getBoundingRect();
-      // TODO transform
+      const bounds = collider
+        .getBoundingRect()
+        .transform(transform.matrix.data);
+
       qTree.insert({
         ...movable,
-        x: bounds.x + transform.position.x,
-        y: bounds.y + transform.position.y,
-        width: bounds.width,
-        height: bounds.height,
+        ...bounds,
       });
     }
 
     // Narrow phase
-    for (const node of qTree.getLeafNodes()) {
-      const elements = node.getElements();
+    // for (const node of qTree.getLeafNodes()) {
+    //   const elements = node.getElements();
+    const elements = movables;
 
-      for (let i = 0; i < elements.length; i++) {
-        const element1 = elements[i];
+    for (let i = 0; i < elements.length; i++) {
+      const element1 = elements[i];
+      const {
+        transform: transform1,
+        collidable: { collider: collider1 },
+      } = element1;
+
+      for (let j = i + 1; j < elements.length; j++) {
+        const element2 = elements[j];
         const {
-          transform: transform1,
-          collidable: { collider: collider1 },
-        } = element1;
+          transform: transform2,
+          collidable: { collider: collider2 },
+        } = element2;
 
-        for (let j = i + 1; j < elements.length; j++) {
-          const element2 = elements[j];
-          const {
-            transform: transform2,
-            collidable: { collider: collider2 },
-          } = element2;
+        if (collider1 instanceof Circle && collider2 instanceof Circle) {
+          const circle1 = collider1.clone().transform(transform1.matrix.data);
+          const circle2 = collider2.clone().transform(transform2.matrix.data);
 
-          if (collider1 instanceof Circle && collider2 instanceof Circle) {
-            const circle1 = Circle.from({
-              x: collider1.x + transform1.position.x,
-              y: collider1.y + transform1.position.y,
-              radius: collider1.radius * transform1.scale.x,
+          if (Circle.overlapsCircle(circle1, circle2)) {
+            collisions.add({
+              source: element1.id,
+              target: element2.id,
             });
-            const circle2 = Circle.from({
-              x: collider2.x + transform2.position.x,
-              y: collider2.y + transform2.position.y,
-              radius: collider2.radius * transform2.scale.x,
-            });
+          }
+        } else if (collider1 instanceof Rect && collider2 instanceof Rect) {
+          const rect1 = collider1.clone().transform(transform1.matrix.data);
+          const rect2 = collider2.clone().transform(transform2.matrix.data);
 
-            if (Circle.overlapsCircle(circle1, circle2)) {
-              collisions.add({
-                source: element1.id,
-                target: element2.id,
-              });
-            }
-          } else if (collider1 instanceof Rect && collider2 instanceof Rect) {
-            const rect1 = Rect.from({
-              x: collider1.x + transform1.position.x,
-              y: collider1.y + transform1.position.y,
-              width: collider1.width * transform1.scale.x,
-              height: collider1.height * transform1.scale.y,
+          if (Rect.overlapsRect(rect1, rect2)) {
+            collisions.add({
+              source: element1.id,
+              target: element2.id,
             });
-            const rect2 = Rect.from({
-              x: collider2.x + transform2.position.x,
-              y: collider2.y + transform2.position.y,
-              width: collider2.width * transform2.scale.x,
-              height: collider2.height * transform2.scale.y,
-            });
+          }
+        } else if (collider1 instanceof Circle && collider2 instanceof Rect) {
+          const circle = collider1.clone().transform(transform1.matrix.data);
+          const rect = collider2.clone().transform(transform2.matrix.data);
 
-            if (Rect.overlapsRect(rect1, rect2)) {
-              collisions.add({
-                source: element1.id,
-                target: element2.id,
-              });
-            }
-          } else if (collider1 instanceof Circle && collider2 instanceof Rect) {
-            const circle = Circle.from({
-              x: collider1.x + transform1.position.x,
-              y: collider1.y + transform1.position.y,
-              radius: collider1.radius * transform1.scale.x,
+          if (Circle.overlapsRect(circle, rect)) {
+            collisions.add({
+              source: element1.id,
+              target: element2.id,
             });
-            const rect = Rect.from({
-              x: collider2.x + transform2.position.x,
-              y: collider2.y + transform2.position.y,
-              width: collider2.width * transform2.scale.x,
-              height: collider2.height * transform2.scale.y,
-            });
+          }
+        } else if (collider1 instanceof Rect && collider2 instanceof Circle) {
+          const rect = collider1.clone().transform(transform1.matrix.data);
+          const circle = collider2.clone().transform(transform2.matrix.data);
 
-            if (Circle.overlapsRect(circle, rect)) {
-              collisions.add({
-                source: element1.id,
-                target: element2.id,
-              });
-            }
-          } else if (collider1 instanceof Rect && collider2 instanceof Circle) {
-            const rect = Rect.from({
-              x: collider1.x + transform1.position.x,
-              y: collider1.y + transform1.position.y,
-              width: collider1.width * transform1.scale.x,
-              height: collider1.height * transform1.scale.y,
+          if (Rect.overlapsCircle(rect, circle)) {
+            collisions.add({
+              source: element1.id,
+              target: element2.id,
             });
-            const circle = Circle.from({
-              x: collider2.x + transform2.position.x,
-              y: collider2.y + transform2.position.y,
-              radius: collider2.radius * transform2.scale.x,
-            });
-
-            if (Rect.overlapsCircle(rect, circle)) {
-              collisions.add({
-                source: element1.id,
-                target: element2.id,
-              });
-            }
           }
         }
       }
     }
+    // }
   }
 }

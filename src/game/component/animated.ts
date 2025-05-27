@@ -14,6 +14,8 @@ export enum CharacterAnimation {
   WALKING = "WALKING",
   RUNNING = "RUNNING",
   JUMPING = "JUMPING",
+  FLYING = "FLYING",
+  EATING = "EATING",
 }
 
 export class FrameAnimation implements Animation {

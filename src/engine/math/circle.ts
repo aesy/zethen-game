@@ -1,9 +1,8 @@
-import { Vec2 } from "@/engine/math/vec2";
+import { Vec2, Vec2Like } from "@/engine/math/vec2";
 import { Rect, RectLike } from "@/engine/math/rect";
 import { Pnt2, Pnt2Like, ReadonlyPnt2 } from "@/engine/math/pnt2";
+import { Mat3x3Like } from "@/engine/math/mat3x3";
 import { Line2Like } from "@/engine/math/line2";
-
-// TODO translate, rotate, scale, transform
 
 export type CircleLike = {
   x: number;
@@ -45,6 +44,35 @@ export class Circle implements CircleLike, ReadonlyCircle {
 
   public static from(circle: Readonly<CircleLike>): Circle {
     return new Circle(circle.x, circle.y, circle.radius);
+  }
+
+  public translate(vec: Readonly<Vec2Like>): this {
+    this.x += vec.x;
+    this.y += vec.y;
+
+    return this;
+  }
+
+  public rotate(radians: number): this {
+    // Do nothing lol
+    return this;
+  }
+
+  public scale(scale: number): this {
+    this.radius *= scale;
+
+    return this;
+  }
+
+  public transform(mat: Readonly<Mat3x3Like>): this {
+    const center = Vec2.transformMat3(this, mat);
+    const radius = Vec2.transformMat3({ x: this.radius, y: 0 }, mat).x;
+
+    this.x = center.x;
+    this.y = center.y;
+    this.radius = Math.abs(center.x - radius);
+
+    return this;
   }
 
   public getClosestPoint(point: Readonly<Pnt2Like>): Pnt2 {

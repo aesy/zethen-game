@@ -29,6 +29,20 @@ export class EventBus {
     };
   }
 
+  public unregister<T extends Event>(
+    type: EventType<T>,
+    callback: Callback<T>,
+  ): void {
+    const callbacks = this.events.get(type);
+
+    if (callbacks) {
+      this.events.set(
+        type,
+        callbacks.filter((c) => c !== callback),
+      );
+    }
+  }
+
   public once<T extends Event>(
     type: EventType<T>,
     callback: Callback<T>,
@@ -48,20 +62,6 @@ export class EventBus {
     return {
       unregister: () => this.unregister(type, wrapper),
     };
-  }
-
-  public unregister<T extends Event>(
-    type: EventType<T>,
-    callback: Callback<T>,
-  ): void {
-    const callbacks = this.events.get(type);
-
-    if (callbacks) {
-      this.events.set(
-        type,
-        callbacks.filter((c) => c !== callback),
-      );
-    }
   }
 
   public emit<T extends Event>(event: T): void {

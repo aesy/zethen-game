@@ -8,15 +8,15 @@ export class State<S> {
     private readonly priority: number,
   ) {}
 
-  public static deepEquals<S>(state: S): State<S> {
+  public static equals<S>(state: S): State<S> {
     return new State((s) => Objects.deepEquals(state, s), 200);
   }
 
-  public static matches<S>(state: S): State<S> {
+  public static matches<S>(state: Partial<S>): State<S> {
     return new State((s) => Objects.partiallyEquals(state, s), 300);
   }
 
-  public static equals<S>(state: S): State<S> {
+  public static is<S>(state: S): State<S> {
     return new State((s) => s === state, 400);
   }
 
@@ -54,7 +54,7 @@ export class StateMachine<S, E> {
     if (state instanceof State) {
       matcher = state;
     } else {
-      matcher = State.equals(state);
+      matcher = State.is(state);
     }
 
     this.transitions.push([matcher, fn], matcher.getPriority());

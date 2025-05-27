@@ -20,7 +20,7 @@ export function createBall(entities: EntityManager): EntityId {
     (Math.random() * 1000 - 500) * 0.2,
   );
   const radius = Math.random() * 60 + 20;
-  const circle = new CircleComponent(radius, new Rgba(125, 200, 0, 1));
+  const circle = new CircleComponent(radius, new Rgba(67, 175, 17, 1));
   const physical = new Physical(10, velocity);
   const collidable = new Collidable(new Circle(0, 0, radius));
   const zIndex = new ZIndex(1);

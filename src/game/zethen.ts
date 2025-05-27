@@ -7,6 +7,7 @@ import { DamageSystem } from "@/game/system/damage";
 import { CollisionSystem } from "@/game/system/collision";
 import { AttachSystem } from "@/game/system/attach";
 import { AnimationSystem } from "@/game/system/animation";
+import { AiSystem } from "@/game/system/ai";
 import { ShapeRenderer } from "@/game/renderer/shape";
 import { ImageRenderer } from "@/game/renderer/image";
 import {
@@ -17,6 +18,7 @@ import {
 } from "@/game/renderer/debug";
 import { createTileMap } from "@/game/entity/tilemap";
 import { createPlayer } from "@/game/entity/player";
+import { createPigeon } from "@/game/entity/pigeon";
 import { createCamera } from "@/game/entity/camera";
 import { createBox } from "@/game/entity/box";
 import { createBall } from "@/game/entity/ball";
@@ -74,7 +76,7 @@ export async function createGame(): Promise<Game> {
   });
   systems.add(new PlayerControlSystem(context));
   // systems.add(new GravitySystem());
-  systems.add(new MoveSystem());
+  // systems.add(new MoveSystem());
   systems.add(new AttachSystem());
   systems.add(new CollisionSystem());
   systems.add(new DamageSystem());
@@ -85,19 +87,24 @@ export async function createGame(): Promise<Game> {
   systems.add(new ShapeRenderer(context));
   systems.add(new ColliderDebugRenderer(context));
   systems.add(new CollisionDebugRenderer(context));
-  systems.add(new VelocityDebugRenderer(context, 0.5));
-  systems.add(new CameraDebugRenderer(context));
+  // systems.add(new VelocityDebugRenderer(context, 0.5));
+  // systems.add(new CameraDebugRenderer(context));
   systems.add(new GuiSystem(context));
   // systems.add(new WebGLRenderer(context));
+  systems.add(new AiSystem(context));
 
   const player = await createPlayer(entities);
   createCamera(entities, player);
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 50; i++) {
+    await createPigeon(entities);
+  }
+
+  for (let i = 0; i < 20; i++) {
     createBall(entities);
   }
 
-  for (let i = 0; i < 100; i++) {
+  for (let i = 0; i < 20; i++) {
     createBox(entities);
   }
 
